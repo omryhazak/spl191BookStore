@@ -15,7 +15,10 @@ public class Customer {
 	private String name;
 	private String address;
 	private int distance;
+
+	//may change due to concurrency..
 	private List<OrderReceipt> receiptList;
+
 	private int creditCard;
 	private int availableAmountInCard;
 
@@ -93,7 +96,7 @@ public class Customer {
 	/**
 	 * Sets the amount of money left on this customers credit card.
 	 */
-	public void setAmountInCard(int charge) {
+	public void chargeCustomer(int charge) {
 		availableAmountInCard = availableAmountInCard - charge;
 	}
 	

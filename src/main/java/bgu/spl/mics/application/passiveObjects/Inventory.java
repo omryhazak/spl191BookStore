@@ -2,6 +2,8 @@ package bgu.spl.mics.application.passiveObjects;
 
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static javax.swing.UIManager.put;
 
@@ -17,17 +19,21 @@ import static javax.swing.UIManager.put;
  */
 public class Inventory {
 
-	private static ConcurrentHashMap hash;
+	private static ConcurrentHashMap<String, BookInventoryInfo> inv;
 
-	//starting singleton
-	private static class InventoryHolder{
-	    public static Inventory ins = new Inventory();
-    }
+	/**
+	 * Private class that holds the singelton.
+	 */
+	private static class Holder {
+		private static Inventory instance = new Inventory();
+	}
 
-    private Inventory(){
-	    this.hash = new ConcurrentHashMap();
-    }
-    //ending singleton
+	/**
+	 * Initialization code for ResourceHolder.
+	 */
+	private Inventory() {
+		inv = new ConcurrentHashMap<String, BookInventoryInfo>();
+	}
 
 	/**
      * Retrieves the single instance of this class.
@@ -36,8 +42,7 @@ public class Inventory {
 	 * @post: get one of a kind new inventory.
      */
 	public static Inventory getInstance() {
-
-		return InventoryHolder.ins;
+		return Holder.instance;
 	}
 	
 	/**
@@ -54,9 +59,10 @@ public class Inventory {
 		if (inventory != null) {
 			//add each book to the hashmap
 			for (int i = 0; i < inventory.length; i++) {
-				put(inventory[i].getBookTitle(), inventory[i].getAmountInInventory());
+				inv.put(inventory[i].getBookTitle(), inventory[i]);
 			}
 		}
+
 	}
 	
 	/**
@@ -71,8 +77,22 @@ public class Inventory {
 	 * @post: if  checkAvailabiltyAndGetPrice({@param book}) != (-1), setAmountInInventory({@param book})
      */
 	public OrderResult take (String book) {
-		
-		return null;
+		BookInventoryInfo b = inv.get(book);
+		OrderResult orderResult;
+		orderResult = OrderResult.SUCCESSFULLY_TAKEN;
+			try{
+				b.semaphore.acquire();
+				if (b.getAmountInInventory() != 0) {
+					b.reduceAmountInInventory();
+					orderResult = OrderResult.SUCCESSFULLY_TAKEN;
+				}
+				else{
+					orderResult = OrderResult.NOT_IN_STOCK;
+				}
+			}catch(Exception e){
+				b.semaphore.release();
+			}
+		return orderResult;
 	}
 	
 	
@@ -87,8 +107,18 @@ public class Inventory {
 	 * @post: none.
      */
 	public int checkAvailabiltyAndGetPrice(String book) {
-		//TODO: Implement this
-		return -1;
+		BookInventoryInfo b = inv.get(book);
+		AtomicInteger i;
+		i.set(-1);
+		try {
+			b.semaphore.acquire();
+			if (b.getAmountInInventory() != 0) {
+				i.set(b.getPrice());
+			}
+		} catch (Exception e) {
+			b.semaphore.release();
+		}
+		return i.get();
 	}
 	
 	/**
@@ -101,6 +131,6 @@ public class Inventory {
 	 * @pre: hash.isEmpty != null
      */
 	public void printInventoryToFile(String filename){
-		//TODO: Implement this
+
 	}
 }
