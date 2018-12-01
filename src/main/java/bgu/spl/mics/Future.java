@@ -29,7 +29,11 @@ public class Future<T> {
 	public T get() {
 
 		while (!isDone()){
-
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}
@@ -38,7 +42,7 @@ public class Future<T> {
      * Resolves the result of this Future object.
      */
 	public void resolve (T result) {
-
+		notify();
 	}
 	
 	/**

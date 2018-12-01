@@ -1,7 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
 import bgu.spl.mics.Future;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.*;
 import java.util.*;
 
 
@@ -17,9 +16,7 @@ import java.util.*;
 public class ResourcesHolder {
 
 	//field
-	private ConcurrentHashMap<Integer, DeliveryVehicle> availableVehicles;
-	private ConcurrentHashMap<Integer, DeliveryVehicle> inUseVehicles;
-	private Semaphore semaphore;
+	private BlockingQueue<DeliveryVehicle> availableVehicles;
 
 	/**
 	 * Private class that holds the singelton.
@@ -32,9 +29,7 @@ public class ResourcesHolder {
 	 * Initialization code for ResourceHolder.
 	 */
 	private ResourcesHolder() {
-		availableVehicles = new ConcurrentHashMap<Integer,DeliveryVehicle>();
-		inUseVehicles = new ConcurrentHashMap<Integer,DeliveryVehicle>();
-		semaphore = new Semaphore(availableVehicles.size());
+		availableVehicles = new LinkedBlockingQueue<>();
 	}
 
 
@@ -56,14 +51,10 @@ public class ResourcesHolder {
 public Future<DeliveryVehicle> acquireVehicle() {
 	Future f = new Future<DeliveryVehicle>();
 	try {
-		semaphore.acquire();
-		Enumeration<Integer> keys = availableVehicles.keys();
-		Integer key = keys.nextElement();
-		DeliveryVehicle deliveryVehicle = availableVehicles.get(key);
+		DeliveryVehicle deliveryVehicle = availableVehicles.take();
 		f.resolve(deliveryVehicle);
-
-	} catch (Exception e) {
-		semaphore.release();
+	} catch (InterruptedException e) {
+		e.printStackTrace();
 	}
 	return f;
 	}
@@ -75,8 +66,7 @@ public Future<DeliveryVehicle> acquireVehicle() {
      * @param vehicle	{@link DeliveryVehicle} to be released.
      */
 	public void releaseVehicle(DeliveryVehicle vehicle) {
-		DeliveryVehicle deliveryVehicle = inUseVehicles.remove(vehicle);
-		availableVehicles.put(deliveryVehicle.getLicense(), deliveryVehicle);
+		availableVehicles.add(vehicle);
 	}
 	
 	/**
@@ -85,9 +75,7 @@ public Future<DeliveryVehicle> acquireVehicle() {
      * @param vehicles	Array of {@link DeliveryVehicle} instances to store.
      */
 	public void load(DeliveryVehicle[] vehicles) {
-		for (DeliveryVehicle deliveryVehicle: vehicles){
-			this.availableVehicles.put(deliveryVehicle.getLicense(), deliveryVehicle);
-		}
+		availableVehicles.addAll(Arrays.asList(vehicles));
 	}
 
 }

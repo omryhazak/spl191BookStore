@@ -1,11 +1,8 @@
 package bgu.spl.mics.application.passiveObjects;
-
-
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static javax.swing.UIManager.put;
+
 
 /**
  * Passive data-object representing the store inventory.
@@ -32,7 +29,7 @@ public class Inventory {
 	 * Initialization code for ResourceHolder.
 	 */
 	private Inventory() {
-		inv = new ConcurrentHashMap<String, BookInventoryInfo>();
+		inv = new ConcurrentHashMap<>();
 	}
 
 	/**
@@ -81,16 +78,13 @@ public class Inventory {
 		OrderResult orderResult;
 		orderResult = OrderResult.SUCCESSFULLY_TAKEN;
 			try{
-				b.semaphore.acquire();
-				if (b.getAmountInInventory() != 0) {
-					b.reduceAmountInInventory();
-					orderResult = OrderResult.SUCCESSFULLY_TAKEN;
-				}
-				else{
+				if (!b.semaphore.tryAcquire()){
 					orderResult = OrderResult.NOT_IN_STOCK;
 				}
+				else {
+					b.reduceAmountInInventory();
+				}
 			}catch(Exception e){
-				b.semaphore.release();
 			}
 		return orderResult;
 	}
@@ -109,7 +103,7 @@ public class Inventory {
 	public int checkAvailabiltyAndGetPrice(String book) {
 		BookInventoryInfo b = inv.get(book);
 		AtomicInteger i;
-		i.set(-1);
+
 		try {
 			b.semaphore.acquire();
 			if (b.getAmountInInventory() != 0) {
