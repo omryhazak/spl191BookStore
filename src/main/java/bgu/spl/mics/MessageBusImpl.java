@@ -69,15 +69,20 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		Future f = new Future();
+		Future<T> f = new Future<T>();
 		MicroService m = mapOfEvents.get(e).poll();
-		mapOfMS.get(m).add(e);
-		return f;
+		if (m != null) {
+			mapOfMS.get(m).add(Pair.create(e, f));
+			return f;
+		}
+		else{
+			return null;
+		}
 	}
 
 	@Override
 	public void register(MicroService m) {
-		BlockingQueue<Message> q = new LinkedBlockingQueue<>();
+		BlockingQueue q = new LinkedBlockingQueue<Pair<Message,Future>>();
 		mapOfMS.put(m, q);
 	}
 
