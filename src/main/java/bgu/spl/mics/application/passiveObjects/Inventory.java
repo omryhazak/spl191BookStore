@@ -77,15 +77,19 @@ public class Inventory {
 		BookInventoryInfo b = inv.get(book);
 		OrderResult orderResult;
 		orderResult = OrderResult.SUCCESSFULLY_TAKEN;
-			try{
-				if (!b.semaphore.tryAcquire()){
+		if (b != null) {
+			try {
+				if (!b.semaphore.tryAcquire()) {
 					orderResult = OrderResult.NOT_IN_STOCK;
-				}
-				else {
+				} else {
 					b.reduceAmountInInventory();
 				}
-			}catch(Exception e){
+			} catch (Exception e) {
 			}
+		}
+		else {
+			orderResult = OrderResult.NOT_IN_STOCK;
+		}
 		return orderResult;
 	}
 	
