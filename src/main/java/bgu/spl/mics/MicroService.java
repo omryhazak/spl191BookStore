@@ -1,5 +1,8 @@
 package bgu.spl.mics;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 /**
  * The MicroService is an abstract class that any micro-service in the system
  * must extend. The abstract MicroService class is responsible to get and
@@ -20,7 +23,8 @@ package bgu.spl.mics;
  */
 public abstract class MicroService implements Runnable {
 
-    private boolean terminated = false;
+    private ConcurrentLinkedQueue<Event> eventsToSubscribe;
+    private boolean terminated;
     private final String name;
 
     /**
@@ -29,6 +33,8 @@ public abstract class MicroService implements Runnable {
      */
     public MicroService(String name) {
         this.name = name;
+        terminated = false;
+        eventsToSubscribe = new ConcurrentLinkedQueue<>();
     }
 
     /**

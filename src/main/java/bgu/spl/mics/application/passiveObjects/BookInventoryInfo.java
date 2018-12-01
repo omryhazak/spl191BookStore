@@ -1,5 +1,8 @@
 package bgu.spl.mics.application.passiveObjects;
 
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Passive data-object representing a information about a certain book in the inventory.
  * You must not alter any of the given public methods of this class. 
@@ -9,15 +12,17 @@ package bgu.spl.mics.application.passiveObjects;
 public class BookInventoryInfo {
 
 	//fields
-	private String title;
-	private int amount;
-	private int price;
+	private final String title;
+	private AtomicInteger amount;
+	private final int price;
+	public Semaphore semaphore;
 
 	//constructor
-	public BookInventoryInfo(String t, int a, int p){
-		title = t;
-		amount = a;
-		price = p;
+	public BookInventoryInfo(String title, int amount, int price){
+		this.title = title;
+		this.amount.set(amount);
+		this.price = price;
+		semaphore = new Semaphore(amount);
 	}
 
 
@@ -27,7 +32,7 @@ public class BookInventoryInfo {
      * @return The title of this book.   
      */
 	public String getBookTitle() {
-		return "";
+		return title;
 	}
 
 	/**
@@ -35,16 +40,16 @@ public class BookInventoryInfo {
      * <p>
      * @return amount of available books.      
      */
-	public int getAmountInInventory() {
-		return 0;
-	}
 
+	public int getAmountInInventory() {
+		return amount.get();
+	}
 
 	/**
 	 * reduces the amount of books of this type in inventory by one.
 	 */
-	public void reduceAmountInInventory(){
-		amount = amount - 1;
+	public void reduceAmountInInventory() {
+		amount.getAndDecrement();
 	}
 
 	/**
@@ -53,7 +58,7 @@ public class BookInventoryInfo {
      * @return the price of the book.
      */
 	public int getPrice() {
-		return 0;
+		return price;
 	}
 	
 	

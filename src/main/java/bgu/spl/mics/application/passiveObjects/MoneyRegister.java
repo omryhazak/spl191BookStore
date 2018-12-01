@@ -1,6 +1,8 @@
 package bgu.spl.mics.application.passiveObjects;
 
 
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Passive object representing the store finance management. 
@@ -12,13 +14,33 @@ package bgu.spl.mics.application.passiveObjects;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class MoneyRegister {
-	
+
+	//field
+	private ConcurrentLinkedQueue<OrderReceipt> list;
+	private int totalEarnings;
+
 	/**
-     * Retrieves the single instance of this class.
-     */
+	 * Private class that holds the singelton.
+	 */
+	private static class Holder {
+		private static MoneyRegister instance = new MoneyRegister();
+	}
+
+	/**
+	 * Initialization code for ResourceHolder.
+	 */
+	private MoneyRegister() {
+		list = new ConcurrentLinkedQueue<OrderReceipt>();
+		totalEarnings = 0;
+
+	}
+
+
+	/**
+	 * Retrieves the single instance of this class.
+	 */
 	public static MoneyRegister getInstance() {
-		//TODO: Implement this
-		return null;
+		return Holder.instance;
 	}
 	
 	/**
@@ -27,15 +49,14 @@ public class MoneyRegister {
      * @param r		The receipt to save in the money register.
      */
 	public void file (OrderReceipt r) {
-		//TODO: Implement this.
+		list.add(r);
 	}
 	
 	/**
      * Retrieves the current total earnings of the store.  
      */
 	public int getTotalEarnings() {
-		//TODO: Implement this
-		return 0;
+		return totalEarnings;
 	}
 	
 	/**
@@ -44,7 +65,8 @@ public class MoneyRegister {
      * @param amount 	amount to charge
      */
 	public void chargeCreditCard(Customer c, int amount) {
-		// TODO Implement this
+		c.chargeCustomer(amount);
+		totalEarnings = totalEarnings + amount;
 	}
 	
 	/**
@@ -53,6 +75,9 @@ public class MoneyRegister {
      * This method is called by the main method in order to generate the output.. 
      */
 	public void printOrderReceipts(String filename) {
-		//TODO: Implement this
+		Iterator<OrderReceipt> iter = list.iterator();
+		while (iter.hasNext()){
+			//to do printing!!
+		}
 	}
 }
