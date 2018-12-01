@@ -81,7 +81,7 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> void complete(Event<T> e, T result) {
-
+		mapOfFutures.get(e).resolve(result);
 
 	}
 

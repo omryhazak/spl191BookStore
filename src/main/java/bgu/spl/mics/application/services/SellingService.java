@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 
 /**
  * Selling service in charge of taking orders from customers.
@@ -14,15 +15,27 @@ import bgu.spl.mics.MicroService;
  */
 public class SellingService extends MicroService{
 
+	private MoneyRegister moneyRegister;
+
 	public SellingService() {
 		super("Change_This_Name");
-		// TODO Implement this
+		moneyRegister = MoneyRegister.getInstance();
+
+
 	}
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
+
+
 		
 	}
 
+
+//	this.name = name;
+//	terminated = false;
+//	eventsToSubscribe = new ConcurrentLinkedQueue<>();
+//	mapOfCallbacksForBroadcasts = new ConcurrentHashMap<>();
+//	mapOfCallbacksForEvents = new ConcurrentHashMap<>();
+//	MB = MessageBusImpl.getInstance();
 }
