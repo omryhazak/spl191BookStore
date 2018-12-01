@@ -18,7 +18,6 @@ public class Customer {
 
 	//may change due to concurrency..
 	private List<OrderReceipt> receiptList;
-
 	private int creditCard;
 	private int availableAmountInCard;
 
