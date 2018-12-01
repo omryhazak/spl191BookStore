@@ -107,16 +107,16 @@ public class Inventory {
 	public int checkAvailabiltyAndGetPrice(String book) {
 		BookInventoryInfo b = inv.get(book);
 		AtomicInteger i = null;
+
 		try {
 			b.semaphore.acquire();
 			if (b.getAmountInInventory() != 0) {
 				i.set(b.getPrice());
 			}
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			b.semaphore.release();
 		}
+		b.semaphore.release();
 		return i.get();
 	}
 	

@@ -1,10 +1,7 @@
 package bgu.spl.mics;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -14,13 +11,15 @@ import java.util.concurrent.TimeUnit;
 public class MessageBusImpl implements MessageBus {
 
 	//fields
-	private ConcurrentHashMap<MicroService, BlockingQueue> mapOfMS;
-	private ConcurrentHashMap<Event, Event> mapOfEvents;
+	private ConcurrentHashMap<MicroService, BlockingQueue<Message>> mapOfMS;
+	private ConcurrentHashMap<Object, BlockingQueue<MicroService>> mapOfEvents;
+	private  ConcurrentHashMap<Object, BlockingQueue<MicroService>> mapOfBroadcasts;
 
 	/**
 	 * Private class that holds the singelton.
 	 */
 	private static class messageBusImplHolder {
+
 		private static MessageBusImpl instance = new MessageBusImpl();
 	}
 
@@ -30,6 +29,7 @@ public class MessageBusImpl implements MessageBus {
 	private MessageBusImpl() {
 		mapOfMS = new ConcurrentHashMap<>();
 		mapOfEvents = new ConcurrentHashMap<>();
+		mapOfBroadcasts = new ConcurrentHashMap<>();
 	}
 
 
@@ -42,15 +42,15 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		// TODO Auto-generated method stub
-
+		generalSubscribe(mapOfEvents, type, m);
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		// TODO Auto-generated method stub
-
+		generalSubscribe(mapOfBroadcasts, type, m);
 	}
+
+
 
 	@Override
 	public <T> void complete(Event<T> e, T result) {
@@ -74,24 +74,37 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public void register(MicroService m) {
 		BlockingQueue<Message> q = new LinkedBlockingQueue<>();
-		map.put(m, q);
+		mapOfMS.put(m, q);
 	}
 
 	@Override
 	public void unregister (MicroService m){
-		map.remove(m);
+		mapOfMS.remove(m);
 
 			//also need to unsubscribe
 	}
 
 	@Override
-	public Message awaitMessage (MicroService m) throws InterruptedException { Message mes = new Message() {
-	};
-	try {
-		mes = (Message) mapOfMS.get(m).take();
-	} catch (InterruptedException e) {
-		e.printStackTrace();
+	public Message awaitMessage (MicroService m) throws InterruptedException {
+		BlockingQueue<Message> q = mapOfMS.get(m);
+		return q.take();
 	}
-	return mes;
+
+	private void  generalSubscribe(ConcurrentHashMap<Object, BlockingQueue<MicroService>> map, Class<? extends Message> type, MicroService m){
+		if (map.get(type) == null){
+			BlockingQueue q = new LinkedBlockingQueue<MicroService>();
+			try {
+				map.put(type, q);
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+		try {
+			map.get(type).add(m);
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 }
+
+
