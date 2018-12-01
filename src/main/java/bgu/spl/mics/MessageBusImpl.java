@@ -12,7 +12,7 @@ public class MessageBusImpl implements MessageBus {
 
 	//fields
 	private ConcurrentHashMap<MicroService, BlockingQueue<Message>> mapOfMS;
-	private ConcurrentHashMap<Object, BlockingQueue<MicroService>> mapOfEvents;
+	private ConcurrentHashMap<Pai, BlockingQueue<MicroService>> mapOfEvents;
 	private  ConcurrentHashMap<Object, BlockingQueue<MicroService>> mapOfBroadcasts;
 
 	/**
@@ -67,8 +67,9 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		// TODO Auto-generated method stub
-		return null;
+		Future f = new Future();
+
+		return f;
 	}
 
 	@Override
