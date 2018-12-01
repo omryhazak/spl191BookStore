@@ -3,7 +3,10 @@ import org.graalvm.util.Pair;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -13,9 +16,18 @@ import java.util.concurrent.*;
 public class MessageBusImpl implements MessageBus {
 
 	//fields
-	private ConcurrentHashMap<MicroService, BlockingQueue<Pair<Message,Future>>> mapOfMS;
+
+	//holding queues of message and future for every micro service registered in the system
+	private ConcurrentHashMap<MicroService, BlockingQueue<Message>> mapOfMS;
+
+	//holding queues of subscribed micro service per event
 	private ConcurrentHashMap<Object, BlockingQueue<MicroService>> mapOfEvents;
-	private  ConcurrentHashMap<Object, BlockingQueue<MicroService>> mapOfBroadcasts;
+
+	//holding arrays f subscribed micro service per broadcast
+	private  ConcurrentHashMap<Object, LinkedList<MicroService>> mapOfBroadcasts;
+
+	//holding all the pairs of future and message
+	private ConcurrentHashMap<Message, Future> mapOfFutures;
 
 	/**
 	 * Private class that holds the singelton.
@@ -32,6 +44,7 @@ public class MessageBusImpl implements MessageBus {
 		mapOfMS = new ConcurrentHashMap<>();
 		mapOfEvents = new ConcurrentHashMap<>();
 		mapOfBroadcasts = new ConcurrentHashMap<>();
+		mapOfFutures = new ConcurrentHashMap<>();
 	}
 
 
@@ -44,26 +57,39 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		generalSubscribe(mapOfEvents, type, m);
+		if (mapOfEvents.get(type) == null){
+			BlockingQueue q = new LinkedBlockingQueue<MicroService>();
+			try {
+				mapOfEvents.put(type, q);
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+		try {
+			mapOfEvents.get(type).add(m);
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		generalSubscribe(mapOfBroadcasts, type, m);
+		mapOfBroadcasts.get(type).add(m);
 	}
 
 
 
 	@Override
 	public <T> void complete(Event<T> e, T result) {
-		// TODO Auto-generated method stub
+
 
 	}
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		// TODO Auto-generated method stub
-
+		for (MicroService m : mapOfBroadcasts.get(b)){
+			mapOfMS.get(m).add(b);
+		}
 	}
 
 
@@ -72,7 +98,8 @@ public class MessageBusImpl implements MessageBus {
 		Future<T> f = new Future<T>();
 		MicroService m = mapOfEvents.get(e).poll();
 		if (m != null) {
-			mapOfMS.get(m).add(Pair.create(e, f));
+			mapOfMS.get(m).add(e);
+			mapOfFutures.put(e, f);
 			return f;
 		}
 		else{
@@ -82,38 +109,37 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void register(MicroService m) {
-		BlockingQueue q = new LinkedBlockingQueue<Pair<Message,Future>>();
+
+		//create m's messages blocking queue
+		BlockingQueue q = new LinkedBlockingQueue<Message>();
 		mapOfMS.put(m, q);
 	}
 
 	@Override
 	public void unregister (MicroService m){
+
+		//delelte m's queue
 		mapOfMS.remove(m);
 
-			//also need to unsubscribe
+		//delete m's event subscription
+		for(BlockingQueue<MicroService> b : mapOfEvents.values()){
+			b.remove(m);
+		}
+
+		//delete m's broadcast subscription
+		for(LinkedList<MicroService> l : mapOfBroadcasts.values()){
+			l.remove(m);
+		}
+
 	}
 
 	@Override
 	public Message awaitMessage (MicroService m) throws InterruptedException {
-		BlockingQueue<Pair<Message,Future>> q = mapOfMS.get(m);
-		return q.take().getLeft();
+		BlockingQueue<Message> q = mapOfMS.get(m);
+		return q.take();
 	}
 
-	private void  generalSubscribe(ConcurrentHashMap<Object, BlockingQueue<MicroService>> map, Class<? extends Message> type, MicroService m){
-		if (map.get(type) == null){
-			BlockingQueue q = new LinkedBlockingQueue<MicroService>();
-			try {
-				map.put(type, q);
-			} catch (Exception e){
-				e.printStackTrace();
-			}
-		}
-		try {
-			map.get(type).add(m);
-		} catch (Exception e){
-			e.printStackTrace();
-		}
-	}
+
 }
 
 
