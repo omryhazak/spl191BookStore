@@ -1,4 +1,6 @@
 package bgu.spl.mics;
+import org.graalvm.util.Pair;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.*;
@@ -11,8 +13,8 @@ import java.util.concurrent.*;
 public class MessageBusImpl implements MessageBus {
 
 	//fields
-	private ConcurrentHashMap<MicroService, BlockingQueue<Message>> mapOfMS;
-	private ConcurrentHashMap<Pai, BlockingQueue<MicroService>> mapOfEvents;
+	private ConcurrentHashMap<MicroService, BlockingQueue<Pair<Message,Future>>> mapOfMS;
+	private ConcurrentHashMap<Object, BlockingQueue<MicroService>> mapOfEvents;
 	private  ConcurrentHashMap<Object, BlockingQueue<MicroService>> mapOfBroadcasts;
 
 	/**
@@ -68,7 +70,8 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
 		Future f = new Future();
-
+		MicroService m = mapOfEvents.get(e).poll();
+		mapOfMS.get(m).add(e);
 		return f;
 	}
 
@@ -87,8 +90,8 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public Message awaitMessage (MicroService m) throws InterruptedException {
-		BlockingQueue<Message> q = mapOfMS.get(m);
-		return q.take();
+		BlockingQueue<Pair<Message,Future>> q = mapOfMS.get(m);
+		return q.take().getLeft();
 	}
 
 	private void  generalSubscribe(ConcurrentHashMap<Object, BlockingQueue<MicroService>> map, Class<? extends Message> type, MicroService m){
