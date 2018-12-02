@@ -42,9 +42,14 @@ public class FutureTest {
 
     }
 
+    /**
+     * positive test for isDone
+     */
     @Test
     public void isDone() {
-
+        assertFalse(fuTest.isDone());
+        fuTest.resolve(3);
+        assertTrue(fuTest.isDone());
     }
 
     @Test

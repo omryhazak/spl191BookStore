@@ -50,6 +50,8 @@ public class MessageBusImpl implements MessageBus {
 
 	/**
 	 * Retrieves the single instance of this class.
+	 *
+	 *
 	 */
 	public static MessageBusImpl getInstance() {
 		return messageBusImplHolder.instance;

@@ -35,7 +35,7 @@ public class InventoryTest {
 
     @Test public void load() {
         //creates anonymous books for test
-        BookInventoryInfo book1 = new BookInventoryInfo() {
+        BookInventoryInfo book1 = new BookInventoryInfo("1", 1, 100) {
             @Override
             public String getBookTitle(){
                 return "1";
@@ -49,7 +49,7 @@ public class InventoryTest {
                 return 100;
             }
         };
-        BookInventoryInfo book2 = new BookInventoryInfo() {
+        BookInventoryInfo book2 = new BookInventoryInfo("2", 1, 150) {
             @Override
             public String getBookTitle(){
                 return "2";
@@ -82,7 +82,7 @@ public class InventoryTest {
 
         //positive test
         //creates anonymous books for test
-        BookInventoryInfo book1 = new BookInventoryInfo() {
+        BookInventoryInfo book1 = new BookInventoryInfo("1", 2, 100) {
             @Override
             public String getBookTitle() {
                 return "1";
@@ -115,7 +115,7 @@ public class InventoryTest {
      */
     @Test public void takeNegative() {
         //creates anonymous books for test
-        BookInventoryInfo book1 = new BookInventoryInfo() {
+        BookInventoryInfo book1 = new BookInventoryInfo("1", 2, 100) {
             @Override
             public String getBookTitle() {
                 return "1";
@@ -139,7 +139,7 @@ public class InventoryTest {
      */
     @Test public void checkAvailabiltyAndGetPrice() {
         //creates anonymous books for test
-        BookInventoryInfo book1 = new BookInventoryInfo() {
+        BookInventoryInfo book1 = new BookInventoryInfo("1", 1, 100) {
             @Override
             public String getBookTitle() {
                 return "1";

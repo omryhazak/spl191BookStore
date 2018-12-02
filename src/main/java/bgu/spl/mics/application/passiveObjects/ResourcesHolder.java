@@ -65,7 +65,7 @@ public Future<DeliveryVehicle> acquireVehicle() {
      * <p>
      * @param vehicle	{@link DeliveryVehicle} to be released.
      */
-	public void releaseVehicle(DeliveryVehicle vehicle) {
+		public void releaseVehicle(DeliveryVehicle vehicle) {
 		availableVehicles.add(vehicle);
 	}
 	
