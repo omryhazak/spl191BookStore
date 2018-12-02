@@ -1,7 +1,11 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Broadcast;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Selling service in charge of taking orders from customers.
@@ -14,7 +18,7 @@ import bgu.spl.mics.application.passiveObjects.MoneyRegister;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class SellingService extends MicroService{
-
+	private AtomicInteger currentTime;
 	private MoneyRegister moneyRegister;
 
 	public SellingService() {
@@ -26,6 +30,9 @@ public class SellingService extends MicroService{
 
 	@Override
 	protected void initialize() {
+		subscribeBroadcast(TickBroadcast.class, Broadcast b -> {
+			this.currentTime++;
+		});
 
 
 		
