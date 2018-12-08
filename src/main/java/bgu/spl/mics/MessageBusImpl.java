@@ -94,8 +94,7 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		if (mapOfBroadcasts != null) {
-			System.out.println(mapOfBroadcasts.get(b).getFirst().getName());
+		if (mapOfBroadcasts.get(b) != null) {
 			for (MicroService m : mapOfBroadcasts.get(b)) {
 				mapOfMS.get(m).add(b);
 			}
