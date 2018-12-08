@@ -77,8 +77,7 @@ public class Inventory {
 		BookInventoryInfo b = inv.get(book);
 		OrderResult orderResult=null;
 
-
-		if (Thread.holdsLock(b)) {
+		if (b.semaphore.tryAcquire()) {
 			b.reduceAmountInInventory();
 			orderResult = OrderResult.SUCCESSFULLY_TAKEN;
 		}
@@ -102,15 +101,10 @@ public class Inventory {
 	public int checkAvailabiltyAndGetPrice(String book) {
 		BookInventoryInfo b = inv.get(book);
 		AtomicInteger i=null ;
-
-		try {
-			b.semaphore.acquire();
-			if (b.getAmountInInventory() != 0) {
+		if (b.getAmountInInventory() != 0) {
 				i.set(b.getPrice());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+
 		return i.get();
 	}
 	

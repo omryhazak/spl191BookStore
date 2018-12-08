@@ -9,4 +9,8 @@ public class TickBroadcast implements Broadcast {
     public TickBroadcast(int currentTick) {
         this.currentTick = currentTick;
     }
+
+    public int getCurrentTick() {
+        return currentTick;
+    }
 }

@@ -14,6 +14,11 @@ public class CheckAvailabilityEvent implements Event<Boolean> {
         this.bookTitle = bookTitle;
     }
 
+    public String getBookTitle() {
+        return bookTitle;
+    }
 
-
+    public Customer getCustomer() {
+        return customer;
+    }
 }

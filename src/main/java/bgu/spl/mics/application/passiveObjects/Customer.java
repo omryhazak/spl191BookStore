@@ -17,7 +17,7 @@ public class Customer {
 	private String name;
 	private String address;
 	private int distance;
-	private Lock lock1;
+
 
 	//may change due to concurrency..
 	private List<OrderReceipt> receiptList;
@@ -33,7 +33,7 @@ public class Customer {
 		this.receiptList = receiptList;
 		this.creditCard = creditCard;
 		this.availableAmountInCard =availableAmountInCard;
-		this.lock1 = new ReentrantLock();
+
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class Customer {
      * @return Amount of money left.   
      */
 	public int getAvailableCreditAmount() {
-		lock1.lock();
+
 		return availableAmountInCard;
 	}
 	
@@ -100,9 +100,10 @@ public class Customer {
 	/**
 	 * Sets the amount of money left on this customers credit card.
 	 */
-	public void chargeCustomer(int charge) {
-		availableAmountInCard = availableAmountInCard - charge;
-		lock1.unlock();
+	public  void chargeCustomer(int charge) {
+		synchronized ((Integer)availableAmountInCard) {
+			availableAmountInCard = availableAmountInCard - charge;
+		}
 	}
 	
 }

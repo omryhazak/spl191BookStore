@@ -38,7 +38,10 @@ public class InventoryService extends MicroService{
 		});
 
 		subscribeEvent(CheckAvailabilityEvent.class, (CheckAvailabilityEvent e) ->{
+			int bookPrice = inventory.checkAvailabiltyAndGetPrice(e.getBookTitle());
+			synchronized ((Integer) e.getCustomer().getAvailableCreditAmount()){
 
+			}
 		});
 
 

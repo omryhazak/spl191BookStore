@@ -38,8 +38,7 @@ public class TimeService extends MicroService{
 		{
 			@Override
 			public void run() {
-				TickBroadcast t = new TickBroadcast(currentTime);
-				sendBroadcast(t);
+				sendBroadcast(new TickBroadcast(currentTime));
 				currentTime = currentTime +1;
 
 			}
