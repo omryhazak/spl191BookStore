@@ -42,6 +42,7 @@ public class ExampleMessageSenderService extends MicroService {
             else {
             	System.out.println("No Micro-Service has registered to handle ExampleEvent events! The event cannot be processed");
             }
+            terminate();
         }
     }
 

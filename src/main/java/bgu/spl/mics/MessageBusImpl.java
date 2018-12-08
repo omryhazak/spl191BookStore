@@ -1,12 +1,6 @@
 package bgu.spl.mics;
-import org.graalvm.util.Pair;
-
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -60,6 +54,23 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
 		if (mapOfEvents.get(type) == null){
+			LinkedList q = new LinkedList();
+			try {
+				mapOfBroadcasts.put(type, q);
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+		try {
+			mapOfBroadcasts.get(type).add(m);
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
+		if (mapOfBroadcasts.get(type) == null){
 			BlockingQueue q = new LinkedBlockingQueue<MicroService>();
 			try {
 				mapOfEvents.put(type, q);
@@ -74,17 +85,11 @@ public class MessageBusImpl implements MessageBus {
 		}
 	}
 
-	@Override
-	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		mapOfBroadcasts.get(type).add(m);
-	}
-
 
 
 	@Override
 	public <T> void complete(Event<T> e, T result) {
 		mapOfFutures.get(e).resolve(result);
-
 	}
 
 	@Override
@@ -98,8 +103,8 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
 		Future<T> f = new Future<T>();
-		MicroService m = mapOfEvents.get(e).poll();
-		if (m != null) {
+		if (mapOfEvents.get(e) != null) {
+			MicroService m = mapOfEvents.get(e).poll();
 			mapOfMS.get(m).add(e);
 			mapOfFutures.put(e, f);
 			return f;

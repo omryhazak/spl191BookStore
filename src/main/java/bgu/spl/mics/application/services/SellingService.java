@@ -30,9 +30,9 @@ public class SellingService extends MicroService{
 
 	@Override
 	protected void initialize() {
-		subscribeBroadcast(TickBroadcast.class, Broadcast b -> {
-			this.currentTime++;
-		});
+//		subscribeBroadcast(TickBroadcast.class, Broadcast b -> {
+//			this.currentTime++;
+//		});
 
 
 		
