@@ -18,7 +18,7 @@ public class MessageBusImpl implements MessageBus {
 	private ConcurrentHashMap<Object, BlockingQueue<MicroService>> mapOfEvents;
 
 	//holding arrays f subscribed micro service per broadcast
-	private  ConcurrentHashMap<Object, LinkedList<MicroService>> mapOfBroadcasts;
+	private ConcurrentHashMap<Object, LinkedList<MicroService>> mapOfBroadcasts;
 
 	//holding all the pairs of future and message
 	private ConcurrentHashMap<Message, Future> mapOfFutures;
@@ -44,8 +44,6 @@ public class MessageBusImpl implements MessageBus {
 
 	/**
 	 * Retrieves the single instance of this class.
-	 *
-	 *
 	 */
 	public static MessageBusImpl getInstance() {
 		return messageBusImplHolder.instance;
@@ -53,38 +51,37 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		if (mapOfEvents.get(type) == null){
+		if (mapOfEvents.get(type) == null) {
 			BlockingQueue q = new LinkedBlockingQueue<MicroService>();
 			try {
 				mapOfEvents.put(type, q);
-			} catch (Exception e){
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 		try {
 			mapOfEvents.get(type).add(m);
-		} catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		if (mapOfBroadcasts.get(type) == null){
+		if (mapOfBroadcasts.get(type) == null) {
 			LinkedList q = new LinkedList();
 			try {
 				mapOfBroadcasts.put(type, q);
-			} catch (Exception e){
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 		try {
 			mapOfBroadcasts.get(type).add(m);
-		} catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
 
 
 	@Override
@@ -94,10 +91,8 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		if (mapOfBroadcasts.get(b) != null) {
-			for (MicroService m : mapOfBroadcasts.get(b)) {
-				mapOfMS.get(m).add(b);
-			}
+		for (MicroService m : mapOfBroadcasts.get(b.getClass())) {
+			mapOfMS.get(m).add(b);
 		}
 	}
 
@@ -110,8 +105,7 @@ public class MessageBusImpl implements MessageBus {
 			mapOfMS.get(m).add(e);
 			mapOfFutures.put(e, f);
 			return f;
-		}
-		else{
+		} else {
 			return null;
 		}
 	}
@@ -125,27 +119,31 @@ public class MessageBusImpl implements MessageBus {
 	}
 
 	@Override
-	public void unregister (MicroService m){
+	public void unregister(MicroService m) {
 
 		//delelte m's queue
 		mapOfMS.remove(m);
 
 		//delete m's event subscription
-		for(BlockingQueue<MicroService> b : mapOfEvents.values()){
+		for (BlockingQueue<MicroService> b : mapOfEvents.values()) {
 			b.remove(m);
 		}
 
 		//delete m's broadcast subscription
-		for(LinkedList<MicroService> l : mapOfBroadcasts.values()){
+		for (LinkedList<MicroService> l : mapOfBroadcasts.values()) {
 			l.remove(m);
 		}
 
 	}
 
 	@Override
-	public Message awaitMessage (MicroService m) throws InterruptedException {
-		BlockingQueue<Message> q = mapOfMS.get(m);
-		return q.take();
+	public Message awaitMessage(MicroService m) throws InterruptedException {
+		try {
+			return mapOfMS.get(m).take();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 

@@ -25,8 +25,7 @@ public abstract class MicroService implements Runnable {
 
     private MessageBus MB;
     private ConcurrentLinkedQueue<Event> eventsToSubscribe;
-    private ConcurrentHashMap<Class<? extends Broadcast>, Callback> mapOfCallbacksForBroadcasts;
-    private ConcurrentHashMap<Class<? extends Event>, Callback> mapOfCallbacksForEvents;
+    private ConcurrentHashMap<Class<? extends Message>, Callback> mapOfCallbacks;
     private boolean terminated;
     private final String name;
 
@@ -38,8 +37,7 @@ public abstract class MicroService implements Runnable {
         this.name = name;
         terminated = false;
         eventsToSubscribe = new ConcurrentLinkedQueue<>();
-        mapOfCallbacksForBroadcasts = new ConcurrentHashMap<>();
-        mapOfCallbacksForEvents = new ConcurrentHashMap<>();
+        mapOfCallbacks = new ConcurrentHashMap<>();
         MB = MessageBusImpl.getInstance();
     }
 
@@ -65,8 +63,8 @@ public abstract class MicroService implements Runnable {
      *                 queue.
      */
     protected final <T, E extends Event<T>> void subscribeEvent(Class<E> type, Callback<E> callback) {
+        mapOfCallbacks.put(type, callback);
         MB.subscribeEvent(type, this);
-        mapOfCallbacksForEvents.put(type, callback);
     }
 
     /**
@@ -91,7 +89,7 @@ public abstract class MicroService implements Runnable {
      */
     protected final <B extends Broadcast> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
         MB.subscribeBroadcast(type, this);
-        mapOfCallbacksForBroadcasts.put(type, callback);
+        mapOfCallbacks.put(type, callback);
     }
 
     /**
@@ -163,8 +161,16 @@ public abstract class MicroService implements Runnable {
     public final void run() {
         initialize();
         while (!terminated) {
-            //this.MB.register(this);
+            MB.register(this);
+
+            try {
+                Message message = MB.awaitMessage(this);
+                mapOfCallbacks.get(message.getClass()).call(message);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+        MB.unregister(this);
     }
 
 }

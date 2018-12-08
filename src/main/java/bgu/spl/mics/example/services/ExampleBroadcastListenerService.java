@@ -38,5 +38,4 @@ public class ExampleBroadcastListenerService extends MicroService {
             }
         });
     }
-
 }
