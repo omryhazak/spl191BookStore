@@ -75,17 +75,12 @@ public class Inventory {
      */
 	public OrderResult take (String book) {
 		BookInventoryInfo b = inv.get(book);
-		OrderResult orderResult;
-		orderResult = OrderResult.SUCCESSFULLY_TAKEN;
-		if (b != null) {
-			try {
-				if (!b.semaphore.tryAcquire()) {
-					orderResult = OrderResult.NOT_IN_STOCK;
-				} else {
-					b.reduceAmountInInventory();
-				}
-			} catch (Exception e) {
-			}
+		OrderResult orderResult=null;
+
+
+		if (Thread.holdsLock(b)) {
+			b.reduceAmountInInventory();
+			orderResult = OrderResult.SUCCESSFULLY_TAKEN;
 		}
 		else {
 			orderResult = OrderResult.NOT_IN_STOCK;
@@ -106,7 +101,7 @@ public class Inventory {
      */
 	public int checkAvailabiltyAndGetPrice(String book) {
 		BookInventoryInfo b = inv.get(book);
-		AtomicInteger i = null;
+		AtomicInteger i=null ;
 
 		try {
 			b.semaphore.acquire();
@@ -116,7 +111,6 @@ public class Inventory {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		b.semaphore.release();
 		return i.get();
 	}
 	
@@ -132,4 +126,5 @@ public class Inventory {
 	public void printInventoryToFile(String filename){
 
 	}
+
 }

@@ -41,9 +41,7 @@ public class TimeService extends MicroService{
 				TickBroadcast t = new TickBroadcast(currentTime);
 				sendBroadcast(t);
 				currentTime = currentTime +1;
-//				if (currentTime == duration+1){
-//					this.cancel();
-//				}
+
 			}
 		};
 	}

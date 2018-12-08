@@ -1,6 +1,8 @@
 package bgu.spl.mics;
 import java.util.LinkedList;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -15,13 +17,13 @@ public class MessageBusImpl implements MessageBus {
 	private ConcurrentHashMap<MicroService, BlockingQueue<Message>> mapOfMS;
 
 	//holding queues of subscribed micro service per event
-	private ConcurrentHashMap<Object, BlockingQueue<MicroService>> mapOfEvents;
+	private ConcurrentHashMap<Object, LinkedList<MicroService>> mapOfEvents;
 
 	//holding arrays f subscribed micro service per broadcast
 	private ConcurrentHashMap<Object, LinkedList<MicroService>> mapOfBroadcasts;
 
 	//holding all the pairs of future and message
-	private ConcurrentHashMap<Message, Future> mapOfFutures;
+	private ConcurrentHashMap<Event, Future> mapOfFutures;
 
 	/**
 	 * Private class that holds the singelton.
@@ -51,42 +53,20 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		if (mapOfEvents.get(type) == null) {
-			BlockingQueue q = new LinkedBlockingQueue<MicroService>();
-			try {
-				mapOfEvents.put(type, q);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		try {
-			mapOfEvents.get(type).add(m);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		subscribeMessage(type, m, mapOfEvents);
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		if (mapOfBroadcasts.get(type) == null) {
-			LinkedList q = new LinkedList();
-			try {
-				mapOfBroadcasts.put(type, q);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		try {
-			mapOfBroadcasts.get(type).add(m);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		subscribeMessage(type, m, mapOfBroadcasts);
 	}
 
 
 	@Override
 	public <T> void complete(Event<T> e, T result) {
+
 		mapOfFutures.get(e).resolve(result);
+
 	}
 
 	@Override
@@ -100,14 +80,25 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
 		Future<T> f = new Future<T>();
-		if (mapOfEvents.get(e) != null) {
-			MicroService m = mapOfEvents.get(e).poll();
-			mapOfMS.get(m).add(e);
-			mapOfFutures.put(e, f);
-			return f;
+		Object lock = new Object();
+		MicroService m;
+
+		if (mapOfEvents.get(e.getClass()) != null) {
+			try {
+				synchronized (lock) {
+					m = mapOfEvents.get(e.getClass()).getFirst();
+					mapOfEvents.get(e.getClass()).addLast(m);
+				}
+				mapOfMS.get(m).add(e);
+				mapOfFutures.put(e, f);
+				return f;
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 		} else {
 			return null;
 		}
+		return null;
 	}
 
 	@Override
@@ -125,7 +116,7 @@ public class MessageBusImpl implements MessageBus {
 		mapOfMS.remove(m);
 
 		//delete m's event subscription
-		for (BlockingQueue<MicroService> b : mapOfEvents.values()) {
+		for (LinkedList<MicroService> b : mapOfEvents.values()) {
 			b.remove(m);
 		}
 
@@ -147,6 +138,21 @@ public class MessageBusImpl implements MessageBus {
 	}
 
 
+	private void subscribeMessage(Class<? extends Message> type, MicroService m, ConcurrentHashMap<Object, LinkedList<MicroService>> map) {
+		//if there is no Q for event E, wew ill create one
+		if (map.get(type) == null) {
+			LinkedList q = new LinkedList();
+			try {
+				map.put(type, q);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		try {
+			map.get(type).add(m);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 }
-
-

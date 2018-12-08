@@ -1,6 +1,8 @@
 package bgu.spl.mics.application.passiveObjects;
 
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Passive data-object representing a customer of the store.
@@ -15,6 +17,7 @@ public class Customer {
 	private String name;
 	private String address;
 	private int distance;
+	private Lock lock1;
 
 	//may change due to concurrency..
 	private List<OrderReceipt> receiptList;
@@ -30,6 +33,7 @@ public class Customer {
 		this.receiptList = receiptList;
 		this.creditCard = creditCard;
 		this.availableAmountInCard =availableAmountInCard;
+		this.lock1 = new ReentrantLock();
 	}
 
 	/**
@@ -82,6 +86,7 @@ public class Customer {
      * @return Amount of money left.   
      */
 	public int getAvailableCreditAmount() {
+		lock1.lock();
 		return availableAmountInCard;
 	}
 	
@@ -97,6 +102,7 @@ public class Customer {
 	 */
 	public void chargeCustomer(int charge) {
 		availableAmountInCard = availableAmountInCard - charge;
+		lock1.unlock();
 	}
 	
 }

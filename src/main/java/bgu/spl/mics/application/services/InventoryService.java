@@ -1,6 +1,11 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.CheckAvailabilityEvent;
+import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.passiveObjects.Inventory;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * InventoryService is in charge of the book inventory and stock.
@@ -14,15 +19,29 @@ import bgu.spl.mics.MicroService;
 
 public class InventoryService extends MicroService{
 
-	public InventoryService() {
-		super("Change_This_Name");
-		// TODO Implement this
+	private AtomicInteger currentTime;
+	private Inventory inventory;
+
+	public InventoryService(String name) {
+		super(name);
+		currentTime.set(1);
+		inventory = Inventory.getInstance();
 	}
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
-		
+		//subscribing to the Tick Broadcast
+		subscribeBroadcast(TickBroadcast.class, b -> {
+
+			////lambda implementation of Tick Broadcast callback
+			this.currentTime.incrementAndGet();
+		});
+
+		subscribeEvent(CheckAvailabilityEvent.class, (CheckAvailabilityEvent e) ->{
+
+		});
+
+
 	}
 
 }

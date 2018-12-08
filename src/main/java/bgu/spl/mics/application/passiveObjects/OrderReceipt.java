@@ -13,8 +13,8 @@ public class OrderReceipt {
 	private int orderId;
 	private String seller;
 	private int customerId;
-	private String bookTitle;
-	private int price;
+	private String bookTitle; //from book order event
+	private int price; //from the check availability event
 	private int issuedTick;
 	private int orderTick;
 	private int processTick;
