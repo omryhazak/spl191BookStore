@@ -54,23 +54,6 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
 		if (mapOfEvents.get(type) == null){
-			LinkedList q = new LinkedList();
-			try {
-				mapOfBroadcasts.put(type, q);
-			} catch (Exception e){
-				e.printStackTrace();
-			}
-		}
-		try {
-			mapOfBroadcasts.get(type).add(m);
-		} catch (Exception e){
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		if (mapOfBroadcasts.get(type) == null){
 			BlockingQueue q = new LinkedBlockingQueue<MicroService>();
 			try {
 				mapOfEvents.put(type, q);
@@ -85,6 +68,23 @@ public class MessageBusImpl implements MessageBus {
 		}
 	}
 
+	@Override
+	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
+		if (mapOfBroadcasts.get(type) == null){
+			LinkedList q = new LinkedList();
+			try {
+				mapOfBroadcasts.put(type, q);
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+		try {
+			mapOfBroadcasts.get(type).add(m);
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+
 
 
 	@Override
@@ -94,8 +94,11 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		for (MicroService m : mapOfBroadcasts.get(b)){
-			mapOfMS.get(m).add(b);
+		if (mapOfBroadcasts != null) {
+			System.out.println(mapOfBroadcasts.get(b).getFirst().getName());
+			for (MicroService m : mapOfBroadcasts.get(b)) {
+				mapOfMS.get(m).add(b);
+			}
 		}
 	}
 
