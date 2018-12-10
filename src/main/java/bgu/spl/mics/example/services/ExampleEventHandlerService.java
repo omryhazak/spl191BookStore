@@ -38,6 +38,7 @@ public class ExampleEventHandlerService extends MicroService {
                 terminate();
             }
         });
+
     }
 
 }

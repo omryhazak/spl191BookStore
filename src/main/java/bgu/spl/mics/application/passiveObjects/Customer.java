@@ -1,6 +1,9 @@
 package bgu.spl.mics.application.passiveObjects;
 
+import org.graalvm.util.Pair;
+
 import java.util.List;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -17,12 +20,10 @@ public class Customer {
 	private String name;
 	private String address;
 	private int distance;
-
-
-	//may change due to concurrency..
 	private List<OrderReceipt> receiptList;
 	private int creditCard;
 	private int availableAmountInCard;
+	public Semaphore semaphore;
 
 	//constructor
 	public Customer(int id, String name, String address, int distance, List<OrderReceipt> receiptList, int creditCard, int availableAmountInCard){
@@ -33,7 +34,7 @@ public class Customer {
 		this.receiptList = receiptList;
 		this.creditCard = creditCard;
 		this.availableAmountInCard =availableAmountInCard;
-
+		semaphore = new Semaphore(1);
 	}
 
 	/**

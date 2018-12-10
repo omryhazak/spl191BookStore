@@ -4,9 +4,11 @@ import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.BookOrderEvent;
 import bgu.spl.mics.application.messages.CheckAvailabilityEvent;
+import bgu.spl.mics.application.messages.TakeEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 import bgu.spl.mics.application.passiveObjects.OrderReceipt;
+import bgu.spl.mics.application.passiveObjects.OrderResult;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Handles {@link BookOrderEvent}.
  * This class may not hold references for objects which it is not responsible for:
  * {@link ResourcesHolder}, {@link Inventory}.
- * 
+ *
  * You can add private fields and public methods to this class.
  * You MAY change constructor signatures and even add new public constructors.
  */
@@ -45,18 +47,36 @@ public class SellingService extends MicroService{
 
 		//subscribing to the BookOrderEvent
 		subscribeEvent(BookOrderEvent.class, (BookOrderEvent e) ->{
-			
+
 			//lambda implementation of bookOrderEvent callback
+			int process = this.currentTime.get();
 			OrderReceipt toReturn = null;
 			int orderTick = e.getOrederTick().get();
-			Future<Boolean> f1 = sendEvent(new CheckAvailabilityEvent(e.getBookTitle(), e.getCustomer()));
-			boolean isTaken = f1.get();
-
-			if(!isTaken){
+			boolean holdKey = false;
+			while(!holdKey){
+				try{
+					e.getCustomer().semaphore.acquire();
+					holdKey = true;
+				}catch(Exception ex){
+					ex.printStackTrace();
+				}
+			}
+			Future<Integer> f1 = sendEvent(new CheckAvailabilityEvent(e.getBookTitle(), e.getCustomer()));
+			int bookPrice = f1.get();
+			boolean customerHasEnoughMoney = (e.getCustomer().getAvailableCreditAmount() - bookPrice >= 0);
+			if(bookPrice <= 0 || !customerHasEnoughMoney){
 				complete(e, null);
 			}else{
-				//intialize the orderReceipt
+				Future<OrderResult> f2 = sendEvent(new TakeEvent(e.getBookTitle()));
+				OrderResult o = f2.get();
+				if(o == OrderResult.SUCCESSFULLY_TAKEN){
+					moneyRegister.chargeCreditCard(e.getCustomer(), bookPrice);
+					toReturn = new OrderReceipt(0, this.getName(),e.getCustomer().getId(), e.getBookTitle(), bookPrice, this.currentTime.get(), orderTick, process);
+					complete(e,toReturn);
+				}
+				else complete(e, null);
 			}
+			e.getCustomer().semaphore.release();
 
 
 
@@ -65,7 +85,7 @@ public class SellingService extends MicroService{
 
 
 
-		
+
 	}
 
 

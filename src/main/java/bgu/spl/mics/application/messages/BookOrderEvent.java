@@ -6,7 +6,8 @@ import bgu.spl.mics.application.passiveObjects.OrderReceipt;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BookOrderEvent implements Event<OrderReceipt> {
+//***************need to be changed also at nir!!!******************************************************
+public class BookOrderEvent implements Event {
 
 
     private String bookTitle;

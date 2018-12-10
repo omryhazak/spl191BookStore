@@ -23,15 +23,30 @@ public class ExampleMessageSenderService extends MicroService {
 
     @Override
     protected void initialize() {
+
         System.out.println("Sender " + getName() + " started");
         if (broadcast) {
             sendBroadcast(new ExampleBroadcast(getName()));
             System.out.println("Sender " + getName() + " publish an event and terminate");
             terminate();
         } else {
+
+            System.out.println("did i just started?");
+            System.out.println("did i just started?");
+            System.out.println("did i just started?");
+            System.out.println("did i just started?");
+
+
+
+
             Future<String> futureObject = (Future<String>)sendEvent(new ExampleEvent(getName()));
+
+
             if (futureObject != null) {
-            	String resolved = futureObject.get(100, TimeUnit.MILLISECONDS);
+
+
+            	String resolved = futureObject.get();
+
             	if (resolved != null) {
             		System.out.println("Completed processing the event, its result is \"" + resolved + "\" - success");
             	}
@@ -40,6 +55,10 @@ public class ExampleMessageSenderService extends MicroService {
                 }
             }
             else {
+
+                System.out.println("duddddduuuddd");
+
+
             	System.out.println("No Micro-Service has registered to handle ExampleEvent events! The event cannot be processed");
             }
             terminate();

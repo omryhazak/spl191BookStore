@@ -49,11 +49,14 @@ public class TimeService extends MicroService{
 	protected void initialize() {
 		timer.schedule(timerTask, System.currentTimeMillis(), speed);
 		//timer.close terminate the timer activity
-		if(currentTime==duration+1){
+
+		while(currentTime < duration+1){
 			timer.cancel();
+			terminate();
 		}
 		//here needs to close the program
 
 	}
 
 }
+
