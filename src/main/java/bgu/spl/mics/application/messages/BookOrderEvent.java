@@ -32,7 +32,7 @@ public class BookOrderEvent implements Event {
         return customer;
     }
 
-    public AtomicInteger getOrederTick() {
+    public AtomicInteger getOrderTick() {
         return orderTick;
     }
 }
