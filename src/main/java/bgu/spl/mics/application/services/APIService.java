@@ -57,17 +57,18 @@ public class APIService extends MicroService {
 				while(!toStop){
 
 				//checks if it is the tick we need to order the book.
-				if (currentTime.get() == orderSchedule.getFirst().getRight()) {
+				if (!orderSchedule.isEmpty() && currentTime.get() == orderSchedule.getFirst().getRight()) {
 
 					//if it is the tick, we will create new orderBook event and take out the pair from the sorted schedule.
 					//we will keep on doing it until the first book which it is not his time to be ordered.
 					//i changed the first argument of the new book order event
 					Future<OrderReceipt> f1 = sendEvent(new BookOrderEvent(orderSchedule.getFirst().getLeft(), customer, currentTime.get()));
 					orderSchedule.poll();
+					OrderReceipt orderReceipt = f1.get();
 
 					//checking the result from the book order event.
 					//according to that, decide if send delivery event
-					if(f1 != null) { //than the book order was successfully executed
+					if(orderReceipt != null) { //than the book order was successfully executed
 						Future f2 = sendEvent(new DeliveryEvent(customer));
 
 					}
