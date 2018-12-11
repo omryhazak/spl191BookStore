@@ -37,7 +37,7 @@ public class BookStoreRunner {
             inventory.load(parser.getInitialInventory());
             ResourcesHolder resourcesHolder = ResourcesHolder.getInstance();
             resourcesHolder.load(parser.getInitialResources()[0].getDeliveryVehicles());
-            parser.getServices().intialCustomers();
+            parser.getServices().initialCustomers();
             parser.getServices().startProgram();
 
 

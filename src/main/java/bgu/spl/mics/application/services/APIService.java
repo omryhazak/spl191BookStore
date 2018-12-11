@@ -7,7 +7,8 @@ import bgu.spl.mics.application.messages.DeliveryEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.Customer;
 import bgu.spl.mics.application.passiveObjects.OrderReceipt;
-import javafx.util.Pair;
+//import javafx.util.Pair;
+import org.graalvm.util.Pair;
 
 
 import java.util.*;
@@ -41,7 +42,7 @@ public class APIService extends MicroService {
 	@Override
 	protected void initialize() {
 		//sorting the order schedule by time the books should be ordered.
-		Collections.sort(orderSchedule, Comparator.comparing(p -> -p.getValue()));
+		Collections.sort(orderSchedule, Comparator.comparing(p -> -p.getRight()));
 
 		//subscribing to the Tick Broadcast
 		//lambda implementation of Tick Broadcast callback
@@ -56,12 +57,12 @@ public class APIService extends MicroService {
 				while(!toStop){
 
 				//checks if it is the tick we need to order the book.
-				if (currentTime.get() == orderSchedule.getFirst().getValue()) {
+				if (currentTime.get() == orderSchedule.getFirst().getRight()) {
 
 					//if it is the tick, we will create new orderBook event and take out the pair from the sorted schedule.
 					//we will keep on doing it until the first book which it is not his time to be ordered.
 					//i changed the first argument of the new book order event
-					Future<OrderReceipt> f1 = sendEvent(new BookOrderEvent(orderSchedule.getFirst().getKey(), customer, currentTime.get()));
+					Future<OrderReceipt> f1 = sendEvent(new BookOrderEvent(orderSchedule.getFirst().getLeft(), customer, currentTime.get()));
 					orderSchedule.poll();
 
 					//checking the result from the book order event.

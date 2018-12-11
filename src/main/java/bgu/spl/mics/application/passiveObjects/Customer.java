@@ -128,7 +128,7 @@ public class Customer {
 
 
 
-	public void intialCustomer(){
+	public void initialCustomer(){
 		this.semaphore = new Semaphore(1);
 		this.creditCardNumber =this.creditCard.getNumber();
 		this.availableAmountInCard = this.creditCard.getAmount();
