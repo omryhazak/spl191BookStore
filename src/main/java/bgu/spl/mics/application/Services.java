@@ -1,5 +1,6 @@
 package bgu.spl.mics.application;
 
+import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.passiveObjects.Customer;
 import bgu.spl.mics.application.services.*;
 
@@ -31,31 +32,31 @@ public class Services {
 
 
         for(int i=1; i <= selling; i++){
-            SellingService toRun = new SellingService("sellingService" + i);
+            SellingService toRun = new SellingService("sellingService" + i, (int) timeService.getDuration());
             microServices.add(toRun);
         }
 
         for(int i=1; i <= inventoryService; i++){
-            InventoryService toRun = new InventoryService("inventoryService" + i);
+            InventoryService toRun = new InventoryService("inventoryService" + i, (int) timeService.getDuration());
             microServices.add(toRun);
 
         }
 
 
         for(int i=1; i <= logistics; i++){
-            LogisticsService toRun = new LogisticsService("logisticsService" + i);
+            LogisticsService toRun = new LogisticsService("logisticsService" + i, (int) timeService.getDuration());
             microServices.add(toRun);
 
         }
 
         for(int i=1; i <= resourcesService; i++){
-            ResourceService toRun = new ResourceService("resourceService" + i);
+            ResourceService toRun = new ResourceService("resourceService" + i, (int) timeService.getDuration());
             microServices.add(toRun);
 
         }
 
         for(int i=0; i < customers.length; i++){
-            APIService toRun = new APIService("apiService" + (i+1), customers[i], (int) time.getDuration());
+            APIService toRun = new APIService("apiService" + (i+1), customers[i], (int) timeService.getDuration());
             microServices.add(toRun);
         }
 

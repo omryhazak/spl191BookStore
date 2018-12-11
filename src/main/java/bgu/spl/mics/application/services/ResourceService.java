@@ -21,12 +21,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ResourceService extends MicroService{
 
 	private ResourcesHolder resourcesHolder;
-	private AtomicInteger currentTime;
+	private int duration;
 
-	public ResourceService(String name) {
+
+	public ResourceService(String name, int duration) {
 		super(name);
 		resourcesHolder = ResourcesHolder.getInstance();
-		currentTime = new AtomicInteger(1);
+		this.duration = duration;
 	}
 
 	@Override
@@ -36,11 +37,8 @@ public class ResourceService extends MicroService{
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
 			////lambda implementation of Tick Broadcast callback
-			this.currentTime.incrementAndGet();
 
-			if (currentTime == duration){
-				resourcesHolder.get
-			}
+			if(b.getCurrentTick()==duration+1) terminate();
 		});
 
 		//subscribing to the CheckVehicle event

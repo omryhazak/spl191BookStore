@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Future;
+import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.BookOrderEvent;
 import bgu.spl.mics.application.messages.CheckAvailabilityEvent;
 import bgu.spl.mics.application.messages.TakeEvent;
@@ -21,15 +22,18 @@ import java.util.concurrent.atomic.AtomicInteger;
  * You can add private fields and public methods to this class.
  * You MAY change constructor signatures and even add new public constructors.
  */
-public class SellingService extends MicroService{
+public class SellingService extends MicroService {
 
 	private AtomicInteger currentTime;
 	private MoneyRegister moneyRegister;
+	private int duration;
 
-	public SellingService(String name) {
+
+	public SellingService(String name, int duration) {
 		super(name);
 		moneyRegister = MoneyRegister.getInstance();
 		this.currentTime = new AtomicInteger(1);
+		this.duration = duration;
 
 
 
@@ -43,7 +47,7 @@ public class SellingService extends MicroService{
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
 			////lambda implementation of Tick Broadcast callback
-			this.currentTime.incrementAndGet();
+			if(b.getCurrentTick()==duration+1) terminate();
 		});
 
 		//subscribing to the BookOrderEvent

@@ -1,21 +1,23 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TickBroadcast;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * TimeService is the global system timer There is only one instance of this micro-service.
  * It keeps track of the amount of ticks passed since initialization and notifies
- * all other micro-services about the current time tick using {@link Tick Broadcast}.
+ * all other micro-services about the current time tick using {@link //Tick Broadcast}.
  * This class may not hold references for objects which it is not responsible for:
  * {@link //ResourcesHolder}, {@link //MoneyRegister}, {@link //Inventory}.
  * 
  * You can add private fields and public methods to this class.
  * You MAY change constructor signatures and even add new public constructors.
  */
-public class TimeService extends MicroService{
+public class TimeService extends MicroService {
 
 	//fields
 	private long speed;
@@ -35,13 +37,13 @@ public class TimeService extends MicroService{
 
 		//creating the TimeTask that sends tickBroadcast every 'speed'
 		timerTask = new TimerTask()
-		//start annonymous class
+		//start anonymous class
 		{
 			@Override
 			public void run() {
+				System.out.println("i am ticking");
 				sendBroadcast(new TickBroadcast(currentTime));
-				currentTime = currentTime +1;
-				if(currentTime == duration) terminateTimeService();
+				currentTime++;
 
 			}
 		};
@@ -49,15 +51,9 @@ public class TimeService extends MicroService{
 
 	@Override
 	protected void initialize() {
-		timer.schedule(timerTask, System.currentTimeMillis(), speed);
-		//timer.close terminate the timer activity
-
-//		while(currentTime < duration+1){
-//			timer.cancel();
-//			terminate();
-//		}
-		//here needs to close the program
-
+		System.out.println("before");
+		timer.schedule(timerTask, 30, 30);
+		System.out.println("after");
 	}
 
 	public void setTimeService(){
@@ -72,8 +68,16 @@ public class TimeService extends MicroService{
 			public void run() {
 				System.out.println("i am ticking");
 				sendBroadcast(new TickBroadcast(currentTime));
-				currentTime = currentTime +1;
-				if(currentTime == duration) terminateTimeService();
+				currentTime++;
+
+				System.out.println(currentTime);
+
+				if(currentTime == duration+1) {
+					System.out.println("i need to die");
+					timerTask.cancel();
+					timer.cancel();
+					terminate();
+				}
 
 
 			}

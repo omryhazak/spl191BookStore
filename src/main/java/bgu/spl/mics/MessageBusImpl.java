@@ -1,9 +1,9 @@
 package bgu.spl.mics;
+import bgu.spl.mics.application.messages.ResolveAllFutures;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -72,34 +72,53 @@ public class MessageBusImpl implements MessageBus {
 
     @Override
     public void sendBroadcast(Broadcast b) {
-        for (MicroService m : mapOfBroadcasts.get(b.getClass())) {
-            mapOfMS.get(m).add(b);
+        LinkedList<MicroService> microServiceLinkedList = mapOfBroadcasts.get(b.getClass());
+        MicroService microService = microServiceLinkedList.getFirst();
+        int counter = 1;
+        while (microService != null && counter < microServiceLinkedList.size()){
+            mapOfMS.get(microService).add(b);
+            microService = microServiceLinkedList.get(counter);
+            counter++;
         }
+
     }
 
 
     @Override
     public <T> Future<T> sendEvent(Event<T> e) {
-        Future<T> f = new Future<T>();
-        Object lock = new Object();
-        MicroService m;
 
-        if (mapOfEvents.get(e.getClass()) != null) {
-            try {
-                synchronized (lock) {
-                    m = mapOfEvents.get(e.getClass()).getFirst();
-                    mapOfEvents.get(e.getClass()).addLast(m);
+        if (!e.getClass().equals(ResolveAllFutures.class)) {
+            Future<T> f = new Future<T>();
+            Object lock = new Object();
+            MicroService m;
+
+            if (mapOfEvents.get(e.getClass()) != null) {
+                try {
+                    synchronized (lock) {
+                        m = mapOfEvents.get(e.getClass()).getFirst();
+                        mapOfEvents.get(e.getClass()).addLast(m);
+                    }
+                    mapOfMS.get(m).add(e);
+                    mapOfFutures.put(e, f);
+                    return f;
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-                mapOfMS.get(m).add(e);
-                mapOfFutures.put(e, f);
-                return f;
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            } else {
+                return null;
             }
-        } else {
-            return null;
+        }
+        else{
+            resolveAllFutures();
         }
         return null;
+    }
+
+    private void resolveAllFutures() {
+        Iterator<Future> iter = mapOfFutures.values().iterator();
+        while (iter.hasNext()){
+            iter.next().resolve(null);
+        }
     }
 
     @Override
@@ -158,5 +177,6 @@ public class MessageBusImpl implements MessageBus {
             e.printStackTrace();
         }
     }
+
 
 }

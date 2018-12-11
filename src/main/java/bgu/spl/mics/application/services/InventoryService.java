@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.CheckAvailabilityEvent;
 import bgu.spl.mics.application.messages.TakeEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
@@ -18,15 +19,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  * You MAY change constructor signatures and even add new public constructors.
  */
 
-public class InventoryService extends MicroService{
+public class InventoryService extends MicroService {
 
-	private AtomicInteger currentTime;
 	private Inventory inventory;
+	private int duration;
 
-	public InventoryService(String name) {
+	public InventoryService(String name, int duration) {
 		super(name);
-		currentTime = new AtomicInteger(1);
 		inventory = Inventory.getInstance();
+		this.duration = duration;
 	}
 
 	@Override
@@ -35,17 +36,16 @@ public class InventoryService extends MicroService{
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
 			////lambda implementation of Tick Broadcast callback
-			this.currentTime.incrementAndGet();
+
+			if(b.getCurrentTick()==duration+1) terminate();
 		});
 
 		subscribeEvent(CheckAvailabilityEvent.class, (CheckAvailabilityEvent e) ->{
-			int bookPrice =inventory.checkAvailabiltyAndGetPrice(e.getBookTitle());
-			complete(e, bookPrice);
+			complete(e, inventory.checkAvailabiltyAndGetPrice(e.getBookTitle()));
 		});
 
 		subscribeEvent(TakeEvent.class, (TakeEvent e) ->{
-			OrderResult toreturn  = inventory.take(e.getBookTitle());
-			complete(e, toreturn);
+			complete(e, inventory.take(e.getBookTitle()));
 		});
 
 

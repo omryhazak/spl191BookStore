@@ -21,11 +21,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class LogisticsService extends MicroService {
 
-	private AtomicInteger currentTime;
+	private int duration;
 
-	public LogisticsService(String name) {
+
+
+	public LogisticsService(String name, int duration) {
 		super(name);
-		currentTime = new AtomicInteger(1);
+		this.duration = duration;
 	}
 
 	@Override
@@ -34,7 +36,7 @@ public class LogisticsService extends MicroService {
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
 			////lambda implementation of Tick Broadcast callback
-			this.currentTime.incrementAndGet();
+			if(b.getCurrentTick()==duration+1) terminate();
 		});
 
 		subscribeEvent(DeliveryEvent.class, (DeliveryEvent e) ->{

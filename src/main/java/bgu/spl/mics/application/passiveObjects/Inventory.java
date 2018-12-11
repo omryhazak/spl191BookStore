@@ -102,7 +102,7 @@ public class Inventory {
 		BookInventoryInfo b = inv.get(book);
 		AtomicInteger i=null ;
 		if (b.getAmountInInventory() != 0) {
-				i.set(b.getPrice());
+				i = new AtomicInteger(b.getPrice());
 		}
 
 		return i.get();

@@ -1,19 +1,11 @@
 package bgu.spl.mics.application.messages;
 
 import bgu.spl.mics.Event;
-import bgu.spl.mics.application.passiveObjects.Customer;
+import bgu.spl.mics.Future;
+import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 
-public class CheckVehicle implements Event<Boolean> {
+public class CheckVehicle implements Event<Future<DeliveryVehicle>> {
 
-
-    private Customer customer;
-
-    public CheckVehicle(Customer customer){
-        this.customer = customer;
+    public CheckVehicle() {
     }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
 }

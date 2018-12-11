@@ -17,9 +17,10 @@ public class BookOrderEvent implements Event {
 
 
     public BookOrderEvent(String bookTitle, Customer customer, int orderTick) {
+
         this.bookTitle = bookTitle;
         this.customer = customer;
-        this.orderTick.set(orderTick);
+        this.orderTick = new AtomicInteger(orderTick);
 
     }
 
