@@ -16,7 +16,10 @@ import java.util.*;
 public class ResourcesHolder {
 
 	//field
-	private BlockingQueue<DeliveryVehicle> availableVehicles;
+	private Queue<DeliveryVehicle> availableVehicles;
+	private Queue<Future<DeliveryVehicle>> futureVehicles;
+	private Semaphore samAvailableVehicles;
+	private Semaphore semFutureVehicles;
 
 	/**
 	 * Private class that holds the singelton.
@@ -29,7 +32,9 @@ public class ResourcesHolder {
 	 * Initialization code for ResourceHolder.
 	 */
 	private ResourcesHolder() {
-		availableVehicles = new LinkedBlockingQueue<>();
+		availableVehicles = new ConcurrentLinkedQueue<>();
+		futureVehicles = new ConcurrentLinkedQueue<>();
+		semFutureVehicles = new Semaphore(0);
 	}
 
 
@@ -49,12 +54,19 @@ public class ResourcesHolder {
 	 * 			{@link DeliveryVehicle} when completed.
 	 */
 	public Future<DeliveryVehicle> acquireVehicle() {
+		//creates a future that will be later resolved to a vehicle.
 		Future f = new Future<DeliveryVehicle>();
-		try {
-			DeliveryVehicle deliveryVehicle = availableVehicles.take();
-			f.resolve(deliveryVehicle);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+
+		//checks if there is a vehicle that can resolve the future immediately
+		if(samAvailableVehicles.tryAcquire()){
+			f.resolve(availableVehicles.poll());
+		}
+
+		//if there is no vehicle available, add the future to the futures list that will be resolved later
+		//when another vehicle will be returned.
+		else{
+			futureVehicles.add(f);
+			semFutureVehicles.release();
 		}
 		return f;
 	}
@@ -66,7 +78,17 @@ public class ResourcesHolder {
 	 * @param vehicle	{@link DeliveryVehicle} to be released.
 	 */
 	public void releaseVehicle(DeliveryVehicle vehicle) {
-		availableVehicles.add(vehicle);
+		//checks if there is a future that waits to be resolved.
+		if(semFutureVehicles.tryAcquire()){
+
+			//if so, resolving the vehicle immediately
+			futureVehicles.poll().resolve(vehicle);
+		}
+		else {
+			//else, returns the vehicle to the list of the available vehicles.
+			availableVehicles.add(vehicle);
+			samAvailableVehicles.release();
+		}
 	}
 
 	/**
@@ -76,9 +98,7 @@ public class ResourcesHolder {
 	 */
 	public void load(DeliveryVehicle[] vehicles) {
 		availableVehicles.addAll(Arrays.asList(vehicles));
+		samAvailableVehicles = new Semaphore(vehicles.length);
 	}
 
 }
-
-
-

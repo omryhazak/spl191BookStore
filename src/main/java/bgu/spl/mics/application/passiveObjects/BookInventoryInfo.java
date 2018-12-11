@@ -61,6 +61,10 @@ public class BookInventoryInfo {
 		return price;
 	}
 
+	public void initialBook(){
+		this.semaphore = new Semaphore(this.amount.get());
+	}
+
 
 	
 }

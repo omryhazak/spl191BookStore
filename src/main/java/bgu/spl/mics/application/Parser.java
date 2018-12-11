@@ -24,7 +24,7 @@ public class Parser {
 
     public void initialSemaphore(){
         for(BookInventoryInfo b : initialInventory){
-            b.semaphore = new Semaphore(b.getAmountInInventory());
+            b.initialBook();
         }
     }
 }

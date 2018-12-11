@@ -1,9 +1,10 @@
 package bgu.spl.mics.application;
 
-import bgu.spl.mics.application.passiveObjects.CreditCard;
 import bgu.spl.mics.application.passiveObjects.Customer;
-import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.services.*;
+
+
+import java.util.LinkedList;
 
 public class Services {
 
@@ -13,6 +14,7 @@ public class Services {
     private int logistics;
     private int resourcesService;
     private Customer[] customers;
+    private LinkedList<MicroService> microServices = new LinkedList<>();
 
 
 
@@ -24,29 +26,59 @@ public class Services {
 
     public void startProgram(){
 
-        this.setTime();
+        TimeService timeService = new TimeService(this.time.getSpeed(), this.time.getDuration());
+        setTime(timeService);
+
 
         for(int i=1; i <= selling; i++){
             SellingService toRun = new SellingService("sellingService" + i);
-            toRun.run();
+            microServices.add(toRun);
         }
 
         for(int i=1; i <= inventoryService; i++){
             InventoryService toRun = new InventoryService("inventoryService" + i);
-            toRun.run();
+            microServices.add(toRun);
+
         }
+
 
         for(int i=1; i <= logistics; i++){
             LogisticsService toRun = new LogisticsService("logisticsService" + i);
-            toRun.run();
+            microServices.add(toRun);
+
         }
 
         for(int i=1; i <= resourcesService; i++){
             ResourceService toRun = new ResourceService("resourceService" + i);
-            toRun.run();
+            microServices.add(toRun);
+
         }
 
-        time.run();
+        for(int i=0; i < customers.length; i++){
+            APIService toRun = new APIService("apiService" + (i+1), customers[i], (int) time.getDuration());
+            microServices.add(toRun);
+        }
+
+        //microServices.add(time);
+//        Iterator<MicroService> iter = microServices.iterator();
+//        while(iter.hasNext()){
+//           Thread t = new Thread(iter.next());
+//            t.start();
+//            System.out.println("fun in run");
+//        }
+        boolean isNull = false;
+        while(!isNull){
+            MicroService m = microServices.pollFirst();
+            if(m != null){
+                Thread t = new Thread(m);
+                t.start();
+
+            }
+            else isNull = true;
+        }
+
+        Thread t2 = new Thread(timeService);
+        t2.start();
     }
 
 
@@ -74,8 +106,8 @@ public class Services {
         return customers;
     }
 
-    public void setTime(){
-        this.time.setTimeService();
+    public void setTime(TimeService t){
+        t.setTimeService();
     }
 
 }

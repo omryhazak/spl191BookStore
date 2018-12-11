@@ -1,6 +1,5 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TickBroadcast;
 
 import java.util.Timer;
@@ -11,7 +10,7 @@ import java.util.TimerTask;
  * It keeps track of the amount of ticks passed since initialization and notifies
  * all other micro-services about the current time tick using {@link Tick Broadcast}.
  * This class may not hold references for objects which it is not responsible for:
- * {@link ResourcesHolder}, {@link MoneyRegister}, {@link Inventory}.
+ * {@link //ResourcesHolder}, {@link //MoneyRegister}, {@link //Inventory}.
  * 
  * You can add private fields and public methods to this class.
  * You MAY change constructor signatures and even add new public constructors.
@@ -19,8 +18,8 @@ import java.util.TimerTask;
 public class TimeService extends MicroService{
 
 	//fields
-	long speed;
-	long duration;
+	private long speed;
+	private long duration;
 	private Timer timer;
 	private TimerTask timerTask;
 	private int currentTime;
@@ -42,6 +41,7 @@ public class TimeService extends MicroService{
 			public void run() {
 				sendBroadcast(new TickBroadcast(currentTime));
 				currentTime = currentTime +1;
+				if(currentTime == duration) terminateTimeService();
 
 			}
 		};
@@ -52,10 +52,10 @@ public class TimeService extends MicroService{
 		timer.schedule(timerTask, System.currentTimeMillis(), speed);
 		//timer.close terminate the timer activity
 
-		while(currentTime < duration+1){
-			timer.cancel();
-			terminate();
-		}
+//		while(currentTime < duration+1){
+//			timer.cancel();
+//			terminate();
+//		}
 		//here needs to close the program
 
 	}
@@ -70,12 +70,27 @@ public class TimeService extends MicroService{
 		{
 			@Override
 			public void run() {
+				System.out.println("i am ticking");
 				sendBroadcast(new TickBroadcast(currentTime));
 				currentTime = currentTime +1;
+				if(currentTime == duration) terminateTimeService();
+
 
 			}
 		};
 	}
 
+	public long getDuration() {
+		return duration;
+	}
+
+	public long getSpeed() {
+		return speed;
+	}
+
+	private void terminateTimeService(){
+		this.terminate();
+	}
 }
+
 

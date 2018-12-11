@@ -166,16 +166,11 @@ public abstract class MicroService implements Runnable {
         while (!terminated) {
 
             //while not interrupted, keep doing your job
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    Message message = MB.awaitMessage(this);
-                    mapOfCallbacks.get(message.getClass()).call(message);
+            try{
+                Message message = MB.awaitMessage(this);
+                mapOfCallbacks.get(message.getClass()).call(message);
 
-
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
+            }catch (InterruptedException e) {}
         }
         Thread.currentThread().interrupt();
         MB.unregister(this);

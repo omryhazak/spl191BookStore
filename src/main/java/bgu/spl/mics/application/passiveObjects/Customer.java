@@ -2,6 +2,7 @@ package bgu.spl.mics.application.passiveObjects;
 
 //import org.graalvm.util.Pair;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
@@ -24,6 +25,7 @@ public class Customer {
 	private int creditCardNumber;
 	private CreditCard creditCard;
 	private List<OrderReceipt> receiptList;
+	private LinkedList<OrderSchedule> orderScheduleList;
 	private OrderSchedule[] orderSchedule;
 	public Semaphore semaphore;
 
@@ -39,21 +41,13 @@ public class Customer {
 		this.availableAmountInCard =availableAmountInCard;
 		this.creditCard = creditCard;
 		this.orderSchedule = orderSchedule;
+		this.orderScheduleList = new LinkedList<>();
 		semaphore = new Semaphore(1);
 
 	}
 
-	public void toPrint(){
-		System.out.println("name: " + this.name);
-		System.out.println("adress: " + this.address);
-		System.out.println("id: " + this.id);
-		System.out.println("distance: " + this.distance);
-		System.out.println("card number: " + this.creditCardNumber);
-		System.out.println("available amount: " + this.availableAmountInCard);
-		for (int i=0; i<this.orderSchedule.length; i++){
-			System.out.println(this.orderSchedule[i].getBookTitle());
-			System.out.println(this.orderSchedule[i].getTick());
-		}
+	public LinkedList<OrderSchedule> getOrderScheduleList() {
+		return orderScheduleList;
 	}
 
 	/**
@@ -127,10 +121,19 @@ public class Customer {
 	}
 
 
-
+	// initial the customer in case the json file created, instead of regular constructor
 	public void initialCustomer(){
 		this.semaphore = new Semaphore(1);
 		this.creditCardNumber =this.creditCard.getNumber();
 		this.availableAmountInCard = this.creditCard.getAmount();
+		this.orderScheduleList = new LinkedList<>();
+		for (OrderSchedule o : this.orderSchedule){
+			this.orderScheduleList.add(o);
+		}
 	}
+
+	public OrderSchedule[] getOrderSchedule(){
+		return orderSchedule;
+	}
+
 }

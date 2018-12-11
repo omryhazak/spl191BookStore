@@ -1,7 +1,6 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Future;
-import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.BookOrderEvent;
 import bgu.spl.mics.application.messages.CheckAvailabilityEvent;
 import bgu.spl.mics.application.messages.TakeEvent;
@@ -48,7 +47,8 @@ public class SellingService extends MicroService{
 		});
 
 		//subscribing to the BookOrderEvent
-		subscribeEvent(BookOrderEvent.class, (BookOrderEvent e) ->{
+		subscribeEvent(BookOrderEvent.class, (BookOrderEvent e
+		) ->{
 
 			//lambda implementation of bookOrderEvent callback
 			int processTick = this.currentTime.get();
@@ -80,6 +80,7 @@ public class SellingService extends MicroService{
 				if(o == OrderResult.SUCCESSFULLY_TAKEN){
 					moneyRegister.chargeCreditCard(e.getCustomer(), bookPrice);
 					toReturn = new OrderReceipt(0, this.getName(),e.getCustomer().getId(), e.getBookTitle(), bookPrice, this.currentTime.get(), orderTick, processTick);
+					moneyRegister.file(toReturn);
 					complete(e,toReturn);
 				}
 				else complete(e, null);
