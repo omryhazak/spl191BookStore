@@ -129,7 +129,7 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
-		if ()
+
 		return mapOfMS.get(m).take();
 	}
 

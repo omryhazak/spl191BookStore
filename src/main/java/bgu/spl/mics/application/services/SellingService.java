@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Holds a reference to the {@link MoneyRegister} singleton of the store.
  * Handles {@link BookOrderEvent}.
  * This class may not hold references for objects which it is not responsible for:
- * {@link ResourcesHolder}, {@link Inventory}.
+ * {@link //ResourcesHolder}, {@link //Inventory}.
  *
  * You can add private fields and public methods to this class.
  * You MAY change constructor signatures and even add new public constructors.
@@ -30,7 +30,9 @@ public class SellingService extends MicroService{
 	public SellingService(String name) {
 		super(name);
 		moneyRegister = MoneyRegister.getInstance();
-		currentTime.set(1);
+		this.currentTime = new AtomicInteger(1);
+
+
 
 
 	}
@@ -49,10 +51,12 @@ public class SellingService extends MicroService{
 		subscribeEvent(BookOrderEvent.class, (BookOrderEvent e) ->{
 
 			//lambda implementation of bookOrderEvent callback
-			int process = this.currentTime.get();
+			int processTick = this.currentTime.get();
 			OrderReceipt toReturn = null;
-			int orderTick = e.getOrederTick().get();
+			int orderTick = e.getOrderTick().get();
 			boolean holdKey = false;
+
+			//acquiring a a key to a customer
 			while(!holdKey){
 				try{
 					e.getCustomer().semaphore.acquire();
@@ -61,9 +65,13 @@ public class SellingService extends MicroService{
 					ex.printStackTrace();
 				}
 			}
+
+			//check availability of the book
 			Future<Integer> f1 = sendEvent(new CheckAvailabilityEvent(e.getBookTitle(), e.getCustomer()));
 			int bookPrice = f1.get();
 			boolean customerHasEnoughMoney = (e.getCustomer().getAvailableCreditAmount() - bookPrice >= 0);
+
+			//check if the customer can afford the book
 			if(bookPrice <= 0 || !customerHasEnoughMoney){
 				complete(e, null);
 			}else{
@@ -71,7 +79,7 @@ public class SellingService extends MicroService{
 				OrderResult o = f2.get();
 				if(o == OrderResult.SUCCESSFULLY_TAKEN){
 					moneyRegister.chargeCreditCard(e.getCustomer(), bookPrice);
-					toReturn = new OrderReceipt(0, this.getName(),e.getCustomer().getId(), e.getBookTitle(), bookPrice, this.currentTime.get(), orderTick, process);
+					toReturn = new OrderReceipt(0, this.getName(),e.getCustomer().getId(), e.getBookTitle(), bookPrice, this.currentTime.get(), orderTick, processTick);
 					complete(e,toReturn);
 				}
 				else complete(e, null);

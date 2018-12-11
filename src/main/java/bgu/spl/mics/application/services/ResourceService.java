@@ -25,7 +25,7 @@ public class ResourceService extends MicroService{
 	public ResourceService(String name) {
 		super(name);
 		resourcesHolder = ResourcesHolder.getInstance();
-		currentTime.set(1);
+		currentTime = new AtomicInteger(1);
 	}
 
 	@Override

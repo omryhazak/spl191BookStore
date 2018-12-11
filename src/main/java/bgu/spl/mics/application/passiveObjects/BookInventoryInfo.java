@@ -12,14 +12,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BookInventoryInfo {
 
 	//fields
-	private final String title;
+	private final String bookTitle;
 	private AtomicInteger amount;
 	private final int price;
 	public Semaphore semaphore;
 
 	//constructor
-	public BookInventoryInfo(String title, int amount, int price){
-		this.title = title;
+	public BookInventoryInfo(String bookTitle, int amount, int price){
+		this.bookTitle = bookTitle;
 		this.amount.set(amount);
 		this.price = price;
 		semaphore = new Semaphore(amount);
@@ -32,7 +32,7 @@ public class BookInventoryInfo {
      * @return The title of this book.   
      */
 	public String getBookTitle() {
-		return title;
+		return bookTitle;
 	}
 
 	/**
@@ -60,8 +60,7 @@ public class BookInventoryInfo {
 	public int getPrice() {
 		return price;
 	}
-	
-	
+
 
 	
 }

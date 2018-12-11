@@ -22,6 +22,7 @@ public class LogisticsService extends MicroService {
 
 	public LogisticsService(String name) {
 		super(name);
+		currentTime = new AtomicInteger(1);
 	}
 
 	@Override

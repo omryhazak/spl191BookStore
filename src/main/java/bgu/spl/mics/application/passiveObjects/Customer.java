@@ -1,6 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
 
-import org.graalvm.util.Pair;
+//import org.graalvm.util.Pair;
 
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -16,25 +16,44 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Customer {
 
 	//fields
-	private int id;
 	private String name;
 	private String address;
+	private int id;
 	private int distance;
-	private List<OrderReceipt> receiptList;
-	private int creditCard;
 	private int availableAmountInCard;
+	private int creditCardNumber;
+	private CreditCard creditCard;
+	private List<OrderReceipt> receiptList;
+	private OrderSchedule[] orderSchedule;
 	public Semaphore semaphore;
 
+
 	//constructor
-	public Customer(int id, String name, String address, int distance, List<OrderReceipt> receiptList, int creditCard, int availableAmountInCard){
+	public Customer(int id, String name, String address, int distance,CreditCard creditCard,  List<OrderReceipt> receiptList, int creditCardNumber, int availableAmountInCard, OrderSchedule[] orderSchedule){
 		this.id = id;
 		this.name = name;
 		this.address = address;
 		this.distance = distance;
 		this.receiptList = receiptList;
-		this.creditCard = creditCard;
+		this.creditCardNumber = creditCardNumber;
 		this.availableAmountInCard =availableAmountInCard;
+		this.creditCard = creditCard;
+		this.orderSchedule = orderSchedule;
 		semaphore = new Semaphore(1);
+
+	}
+
+	public void toPrint(){
+		System.out.println("name: " + this.name);
+		System.out.println("adress: " + this.address);
+		System.out.println("id: " + this.id);
+		System.out.println("distance: " + this.distance);
+		System.out.println("card number: " + this.creditCardNumber);
+		System.out.println("available amount: " + this.availableAmountInCard);
+		for (int i=0; i<this.orderSchedule.length; i++){
+			System.out.println(this.orderSchedule[i].getBookTitle());
+			System.out.println(this.orderSchedule[i].getTick());
+		}
 	}
 
 	/**
@@ -94,8 +113,8 @@ public class Customer {
 	/**
      * Retrieves this customers credit card serial number.    
      */
-	public int getCreditNumber() {
-		return creditCard;
+	public int getCreditCardNumber() {
+		return creditCardNumber;
 	}
 
 	/**
@@ -106,5 +125,12 @@ public class Customer {
 			availableAmountInCard = availableAmountInCard - charge;
 		}
 	}
-	
+
+
+
+	public void intialCustomer(){
+		this.semaphore = new Semaphore(1);
+		this.creditCardNumber =this.creditCard.getNumber();
+		this.availableAmountInCard = this.creditCard.getAmount();
+	}
 }

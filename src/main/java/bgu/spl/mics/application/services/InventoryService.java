@@ -2,8 +2,10 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.CheckAvailabilityEvent;
+import bgu.spl.mics.application.messages.TakeEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.Inventory;
+import bgu.spl.mics.application.passiveObjects.OrderResult;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,7 +26,7 @@ public class InventoryService extends MicroService{
 
 	public InventoryService(String name) {
 		super(name);
-		currentTime.set(1);
+		currentTime = new AtomicInteger(1);
 		inventory = Inventory.getInstance();
 	}
 
@@ -38,10 +40,13 @@ public class InventoryService extends MicroService{
 		});
 
 		subscribeEvent(CheckAvailabilityEvent.class, (CheckAvailabilityEvent e) ->{
-			int bookPrice = inventory.checkAvailabiltyAndGetPrice(e.getBookTitle());
-			synchronized ((Integer) e.getCustomer().getAvailableCreditAmount()){
+			int bookPrice =inventory.checkAvailabiltyAndGetPrice(e.getBookTitle());
+			complete(e, bookPrice);
+		});
 
-			}
+		subscribeEvent(TakeEvent.class, (TakeEvent e) ->{
+			OrderResult toreturn  = inventory.take(e.getBookTitle());
+			complete(e, toreturn);
 		});
 
 

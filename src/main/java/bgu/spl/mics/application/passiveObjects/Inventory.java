@@ -55,8 +55,8 @@ public class Inventory {
 	public void load (BookInventoryInfo[ ] inventory ) {
 		if (inventory != null) {
 			//add each book to the hashmap
-			for (int i = 0; i < inventory.length; i++) {
-				inv.put(inventory[i].getBookTitle(), inventory[i]);
+			for(BookInventoryInfo b : inventory){
+				inv.put(b.getBookTitle(),b);
 			}
 		}
 

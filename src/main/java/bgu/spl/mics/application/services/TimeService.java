@@ -25,6 +25,8 @@ public class TimeService extends MicroService{
 	private TimerTask timerTask;
 	private int currentTime;
 
+
+
 	public TimeService(long speed, long duration) {
 		super("TimeService");
 		this.speed = speed;
@@ -56,6 +58,23 @@ public class TimeService extends MicroService{
 		}
 		//here needs to close the program
 
+	}
+
+	public void setTimeService(){
+		currentTime = 1;
+		timer = new Timer();
+
+		//creating the TimeTask that sends tickBroadcast every 'speed'
+		timerTask = new TimerTask()
+				//start annonymous class
+		{
+			@Override
+			public void run() {
+				sendBroadcast(new TickBroadcast(currentTime));
+				currentTime = currentTime +1;
+
+			}
+		};
 	}
 
 }
