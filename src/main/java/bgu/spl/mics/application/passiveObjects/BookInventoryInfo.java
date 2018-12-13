@@ -50,6 +50,7 @@ public class BookInventoryInfo {
 	 */
 	public void reduceAmountInInventory() {
 		amount.getAndDecrement();
+		System.out.println(bookTitle + " " + getAmountInInventory());
 	}
 
 	/**

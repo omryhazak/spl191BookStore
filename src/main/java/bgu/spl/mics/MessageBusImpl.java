@@ -78,6 +78,7 @@ public class MessageBusImpl implements MessageBus {
     public <T> void complete(Event<T> e, T result) {
 
         mapOfFutures.get(e).resolve(result);
+        mapOfFutures.remove(e);
 
     }
 

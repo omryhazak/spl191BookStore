@@ -3,6 +3,7 @@ package bgu.spl.mics.application.passiveObjects;
 
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -15,7 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * <p>
  * You can add ONLY private fields and methods to this class as you see fit.
  */
-public class MoneyRegister {
+public class MoneyRegister  implements Serializable {
 
 	//field
 	private ConcurrentLinkedQueue<OrderReceipt> list;

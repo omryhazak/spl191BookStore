@@ -66,19 +66,23 @@ public class BookStoreRunner {
     private static void generateOutputFiles(MoneyRegister m, Inventory inv,HashMap<Integer, Customer> customersHashMap, String s1,String s2,String s3,String s4){
         m.printOrderReceipts(s1);
         inv.printInventoryToFile(s2);
-        generateFile(s3, m);
-        generateFile(s4, customersHashMap);
-
-    }
-    //private function that creates output file for a given object
-    private static void generateFile(String s, Object o){
         try{
-            FileOutputStream file = new FileOutputStream(s);
+            FileOutputStream file = new FileOutputStream(s3);
             ObjectOutputStream output = new ObjectOutputStream(file);
-            output.writeObject(o);
+            output.writeObject(m);
+            output.close();
+            file.close();
+        }catch (Exception e){ }
+        try{
+            FileOutputStream file = new FileOutputStream(s4);
+            ObjectOutputStream output = new ObjectOutputStream(file);
+            output.writeObject(customersHashMap);
             output.close();
             file.close();
         }catch (Exception e){ }
 
+
+
     }
+
 }

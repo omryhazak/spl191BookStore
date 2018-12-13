@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.passiveObjects;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>
  * You can add ONLY private fields and methods to this class as you see fit.
  */
-public class Inventory {
+public class Inventory implements Serializable {
 
 	private static ConcurrentHashMap<String, BookInventoryInfo> inv;
 
