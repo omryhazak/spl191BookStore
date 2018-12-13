@@ -36,8 +36,7 @@ public class InventoryService extends MicroService {
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
 			////lambda implementation of Tick Broadcast callback
-
-			if(b.getCurrentTick()==duration+1) terminate();
+			if(b.getCurrentTick()==duration) terminate();
 		});
 
 		subscribeEvent(CheckAvailabilityEvent.class, (CheckAvailabilityEvent e) ->{

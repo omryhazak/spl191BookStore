@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.ResolveAllFutures;
 import bgu.spl.mics.application.messages.TickBroadcast;
 
 import java.util.Timer;
@@ -41,7 +42,7 @@ public class TimeService extends MicroService {
 		{
 			@Override
 			public void run() {
-				System.out.println("i am ticking");
+
 				sendBroadcast(new TickBroadcast(currentTime));
 				currentTime++;
 
@@ -51,9 +52,9 @@ public class TimeService extends MicroService {
 
 	@Override
 	protected void initialize() {
-		System.out.println("before");
+
 		timer.schedule(timerTask, 30, 30);
-		System.out.println("after");
+		terminate();
 	}
 
 	public void setTimeService(){
@@ -66,20 +67,15 @@ public class TimeService extends MicroService {
 		{
 			@Override
 			public void run() {
-				System.out.println("i am ticking");
 				sendBroadcast(new TickBroadcast(currentTime));
-				currentTime++;
-
 				System.out.println(currentTime);
-
+				currentTime++;
 				if(currentTime == duration+1) {
-					System.out.println("i need to die");
+
 					timerTask.cancel();
 					timer.cancel();
-					terminate();
+					sendEvent(new ResolveAllFutures());
 				}
-
-
 			}
 		};
 	}

@@ -1,6 +1,8 @@
 package bgu.spl.mics.application.passiveObjects;
 
 
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -75,9 +77,12 @@ public class MoneyRegister {
      * This method is called by the main method in order to generate the output.. 
      */
 	public void printOrderReceipts(String filename) {
-		Iterator<OrderReceipt> iter = list.iterator();
-		while (iter.hasNext()){
-			//to do printing!!
-		}
+		try{
+			FileOutputStream file = new FileOutputStream(filename);
+			ObjectOutputStream output = new ObjectOutputStream(file);
+			output.writeObject(this.list);
+			output.close();
+			file.close();
+		}catch (Exception e){ }
 	}
 }

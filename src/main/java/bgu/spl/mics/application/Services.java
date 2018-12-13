@@ -26,6 +26,8 @@ public class Services {
     }
 
     public void startProgram(){
+        System.out.println("starting the program");
+        initialCustomers();
 
         TimeService timeService = new TimeService(this.time.getSpeed(), this.time.getDuration());
         setTime(timeService);
@@ -60,27 +62,30 @@ public class Services {
             microServices.add(toRun);
         }
 
-        //microServices.add(time);
-//        Iterator<MicroService> iter = microServices.iterator();
-//        while(iter.hasNext()){
-//           Thread t = new Thread(iter.next());
-//            t.start();
-//            System.out.println("fun in run");
-//        }
+        //creating the threads by their order
         boolean isNull = false;
         while(!isNull){
             MicroService m = microServices.pollFirst();
             if(m != null){
+//                try {
+//                    Thread.sleep(100);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
                 Thread t = new Thread(m);
                 t.start();
 
             }
             else isNull = true;
         }
+
+        //create the timeService thread
+        //we want the time service to start ticking only after all other threads initialized
+        // so we force the main thread to sleep before creating it, in order to let all other threads to subscribe to tick broadcast
         Thread t = Thread.currentThread();
-        System.out.println(t.getName());
         try {
-            t.sleep(10000);
+            t.sleep(1000);
+
         } catch (InterruptedException e) { }
         Thread t2 = new Thread(timeService);
         t2.start();

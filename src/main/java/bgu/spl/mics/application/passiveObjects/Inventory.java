@@ -1,4 +1,7 @@
 package bgu.spl.mics.application.passiveObjects;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -74,12 +77,14 @@ public class Inventory {
 	 * @post: if  checkAvailabiltyAndGetPrice({@param book}) != (-1), setAmountInInventory({@param book})
      */
 	public OrderResult take (String book) {
+		System.out.println("trying to take a book!");
 		BookInventoryInfo b = inv.get(book);
 		OrderResult orderResult=null;
 
 		if (b.semaphore.tryAcquire()) {
 			b.reduceAmountInInventory();
 			orderResult = OrderResult.SUCCESSFULLY_TAKEN;
+			System.out.println("took a book!");
 		}
 		else {
 			orderResult = OrderResult.NOT_IN_STOCK;
@@ -103,6 +108,8 @@ public class Inventory {
 		AtomicInteger i=null ;
 		if (b.getAmountInInventory() != 0) {
 				i = new AtomicInteger(b.getPrice());
+		}else{
+			i = new AtomicInteger(-1);
 		}
 
 		return i.get();
@@ -118,6 +125,23 @@ public class Inventory {
 	 * @pre: hash.isEmpty != null
      */
 	public void printInventoryToFile(String filename){
+		HashMap<String, Integer> booksHashMap = this.createBooksHashMap();
+		try{
+			FileOutputStream file = new FileOutputStream(filename);
+			ObjectOutputStream output = new ObjectOutputStream(file);
+			output.writeObject(booksHashMap);
+			output.close();
+			file.close();
+		}catch (Exception e){ }
+	}
+
+	//creating the book hash map to return in output file
+	private HashMap<String, Integer> createBooksHashMap(){
+		HashMap<String, Integer> toReturn = new HashMap<>();
+		for (BookInventoryInfo b : this.inv.values()){
+			toReturn.put(b.getBookTitle(), b.getAmountInInventory());
+		}
+		return toReturn;
 
 	}
 

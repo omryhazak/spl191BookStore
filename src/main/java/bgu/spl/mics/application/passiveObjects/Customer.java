@@ -127,8 +127,8 @@ public class Customer {
 		this.creditCardNumber =this.creditCard.getNumber();
 		this.availableAmountInCard = this.creditCard.getAmount();
 		this.orderScheduleList = new LinkedList<>();
-		for (OrderSchedule o : this.orderSchedule){
-			this.orderScheduleList.add(o);
+		for (int i = 0; i<this.getOrderSchedule().length; i++){
+			this.orderScheduleList.add(this.orderSchedule[i]);
 		}
 	}
 

@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public abstract class MicroService implements Runnable {
 
     private MessageBus MB;
-    private ConcurrentLinkedQueue<Event> eventsToSubscribe;
     private ConcurrentHashMap<Class<? extends Message>, Callback> mapOfCallbacks;
     private boolean terminated;
     private final String name;
@@ -36,7 +35,6 @@ public abstract class MicroService implements Runnable {
     public MicroService(String name) {
         this.name = name;
         terminated = false;
-        eventsToSubscribe = new ConcurrentLinkedQueue<>();
         mapOfCallbacks = new ConcurrentHashMap<>();
         MB = MessageBusImpl.getInstance();
     }
@@ -159,7 +157,7 @@ public abstract class MicroService implements Runnable {
      */
     @Override
     public final void run() {
-        System.out.println(this.getName() + " is running");
+        System.out.println(this.getName() + " is fucking running");
         MB.register(this);
         initialize();
         while (!terminated) {
@@ -167,6 +165,12 @@ public abstract class MicroService implements Runnable {
             //while not interrupted, keep doing your job
             try{
                 Message message = MB.awaitMessage(this);
+
+
+                if (message == null) {
+                    System.out.println("just a little problem");
+                }
+
                 mapOfCallbacks.get(message.getClass()).call(message);
 
             }catch (InterruptedException e) {}

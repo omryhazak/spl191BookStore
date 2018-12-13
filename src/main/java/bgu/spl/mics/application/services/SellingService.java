@@ -47,15 +47,21 @@ public class SellingService extends MicroService {
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
 			////lambda implementation of Tick Broadcast callback
-			if(b.getCurrentTick()==duration+1) terminate();
+			this.currentTime.set(b.getCurrentTick());
+
+			System.out.println(this.getName() + b.getCurrentTick());
+
+			if(b.getCurrentTick()==duration) terminate();
 		});
-		System.out.println(this.getName() + "subscribed to tickBroadcast");
+
 
 		//subscribing to the BookOrderEvent
 		subscribeEvent(BookOrderEvent.class, (BookOrderEvent e
 		) ->{
 
 			//lambda implementation of bookOrderEvent callback
+			System.out.println("got book order event");
+
 			int processTick = this.currentTime.get();
 			OrderReceipt toReturn = null;
 			int orderTick = e.getOrderTick().get();
@@ -77,7 +83,7 @@ public class SellingService extends MicroService {
 			boolean customerHasEnoughMoney = (e.getCustomer().getAvailableCreditAmount() - bookPrice >= 0);
 
 			//check if the customer can afford the book
-			if(bookPrice <= 0 || !customerHasEnoughMoney){
+			if(bookPrice == -1 || !customerHasEnoughMoney){
 				complete(e, null);
 			}else{
 				Future<OrderResult> f2 = sendEvent(new TakeEvent(e.getBookTitle()));

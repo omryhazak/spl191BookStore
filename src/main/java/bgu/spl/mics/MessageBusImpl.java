@@ -26,6 +26,11 @@ public class MessageBusImpl implements MessageBus {
     //holding all the pairs of future and message
     private ConcurrentHashMap<Event, Future> mapOfFutures;
 
+    //lockers
+    private Object lock1 = new Object();
+    private Object lock2 = new Object();
+    private Object lock3 = new Object();
+
     /**
      * Private class that holds the singelton.
      */
@@ -53,13 +58,19 @@ public class MessageBusImpl implements MessageBus {
     }
 
     @Override
-    public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-        subscribeMessage(type, m, mapOfEvents);
+    public  <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
+        synchronized (lock1) {
+            subscribeMessage(type, m, mapOfEvents);
+        }
     }
 
     @Override
-    public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-        subscribeMessage(type, m, mapOfBroadcasts);
+    public  void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
+        synchronized (lock2) {
+
+            subscribeMessage(type, m, mapOfBroadcasts);
+            System.out.println(m.getName() + " was subscribed");
+        }
     }
 
 
@@ -72,15 +83,16 @@ public class MessageBusImpl implements MessageBus {
 
     @Override
     public void sendBroadcast(Broadcast b) {
-        LinkedList<MicroService> microServiceLinkedList = mapOfBroadcasts.get(b.getClass());
-        MicroService microService = microServiceLinkedList.getFirst();
-        int counter = 1;
-        while (microService != null && counter < microServiceLinkedList.size()){
-            mapOfMS.get(microService).add(b);
-            microService = microServiceLinkedList.get(counter);
-            counter++;
+        synchronized (lock3) {
+            LinkedList<MicroService> microServiceLinkedList = mapOfBroadcasts.get(b.getClass());
+            MicroService microService;
+            int counter = 0;
+            while (counter < microServiceLinkedList.size()) {
+                microService = microServiceLinkedList.get(counter);
+                mapOfMS.get(microService).add(b);
+                counter++;
+            }
         }
-
     }
 
 
@@ -115,9 +127,9 @@ public class MessageBusImpl implements MessageBus {
     }
 
     private void resolveAllFutures() {
-        Iterator<Future> iter = mapOfFutures.values().iterator();
-        while (iter.hasNext()){
-            iter.next().resolve(null);
+        for (Future f : mapOfFutures.values()){
+            f.resolve(null);
+            System.out.println("f resolved");
         }
     }
 
@@ -134,11 +146,11 @@ public class MessageBusImpl implements MessageBus {
 
         //delelte m's queue and all the messages from it
         LinkedList<Message> queue = new LinkedList<>();
-        mapOfMS.get(m).drainTo(queue);
-        Iterator<Message> iterator = queue.listIterator();
-        while(iterator.hasNext()){
-            mapOfFutures.get(iterator.next()).resolve(null);
-        }
+//        mapOfMS.get(m).drainTo(queue);
+//        Iterator<Message> iterator = queue.listIterator();
+//        while(iterator.hasNext()){
+//            mapOfFutures.get(iterator.next()).resolve(null);
+//        }
 
         mapOfMS.remove(m);
 
@@ -162,7 +174,7 @@ public class MessageBusImpl implements MessageBus {
 
 
     private void subscribeMessage(Class<? extends Message> type, MicroService m, ConcurrentHashMap<Object, LinkedList<MicroService>> map) {
-        //if there is no Q for event E, wew ill create one
+        //if there is no Q for event E, we will create one
         if (map.get(type) == null) {
             LinkedList q = new LinkedList();
             try {
@@ -171,10 +183,12 @@ public class MessageBusImpl implements MessageBus {
                 e.printStackTrace();
             }
         }
-        try {
-            map.get(type).add(m);
-        } catch (Exception e) {
-            e.printStackTrace();
+        else {
+            try {
+                map.get(type).add(m);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

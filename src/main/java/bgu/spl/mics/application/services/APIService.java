@@ -37,25 +37,29 @@ public class APIService extends MicroService {
 	@Override
 	protected void initialize() {
 		//sorting the order schedule by time the books should be ordered.
-		Arrays.sort(customer.getOrderSchedule(), Comparator.comparing(OrderSchedule::getTick));
+		Collections.sort(customer.getOrderScheduleList(), Comparator.comparing(OrderSchedule::getTick));
 
 		//subscribing to the Tick Broadcast
 		//lambda implementation of Tick Broadcast callback
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
+			System.out.println(this.getName() +" got a tick " + b.getCurrentTick());
+
 			//checks if there is an order should be sent by going over the sorted list.
+
 			boolean toStop = false;
 
 				while(!toStop){
 
 				//checks if it is the tick we need to order the book.
-				if (customer.getOrderScheduleList().size() != 0 && b.getCurrentTick() == customer.getOrderScheduleList().getFirst().getTick()) {
+				if (customer.getOrderScheduleList().size() != 0 && b.getCurrentTick() == customer.getOrderScheduleList().getLast().getTick()) {
 
 					//if it is the tick, we will create new orderBook event and take out the pair from the sorted schedule.
 					//we will keep on doing it until the first book which it is not his time to be ordered.
 					//i changed the first argument of the new book order event
+					System.out.println("i am going to send an event in" + b.getCurrentTick());
 					Future<OrderReceipt> f1 = sendEvent(new BookOrderEvent(customer.getOrderScheduleList().getFirst().getBookTitle() , customer, b.getCurrentTick()));
-					customer.getOrderScheduleList().poll();
+					customer.getOrderScheduleList().removeLast();
 					OrderReceipt orderReceipt = f1.get();
 
 					//checking the result from the book order event.

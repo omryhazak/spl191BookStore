@@ -22,7 +22,7 @@ public class Parser {
         return initialResources;
     }
 
-    public void initialSemaphore(){
+    public void initialBooksSemaphore(){
         for(BookInventoryInfo b : initialInventory){
             b.initialBook();
         }

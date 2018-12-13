@@ -37,8 +37,9 @@ public class ResourceService extends MicroService{
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
 			////lambda implementation of Tick Broadcast callback
+			System.out.println(this.getName() + "got at tickkkkkkkkkkkkk");
 
-			if(b.getCurrentTick()==duration+1) terminate();
+			if(b.getCurrentTick()==duration) terminate();
 		});
 
 		//subscribing to the CheckVehicle event
