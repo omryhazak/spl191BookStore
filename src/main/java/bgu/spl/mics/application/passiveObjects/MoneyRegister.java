@@ -4,8 +4,11 @@ package bgu.spl.mics.application.passiveObjects;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.HashMap;
+
+import java.util.LinkedList;
+import java.util.List;
+//import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Passive object representing the store finance management. 
@@ -19,7 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class MoneyRegister  implements Serializable {
 
 	//field
-	private ConcurrentLinkedQueue<OrderReceipt> list;
+	private LinkedList<OrderReceipt> list;
 	private int totalEarnings;
 
 	/**
@@ -33,7 +36,7 @@ public class MoneyRegister  implements Serializable {
 	 * Initialization code for ResourceHolder.
 	 */
 	private MoneyRegister() {
-		list = new ConcurrentLinkedQueue<OrderReceipt>();
+		list = new LinkedList<>();
 		totalEarnings = 0;
 
 	}
@@ -78,12 +81,14 @@ public class MoneyRegister  implements Serializable {
      * This method is called by the main method in order to generate the output.. 
      */
 	public void printOrderReceipts(String filename) {
-		try{
-			FileOutputStream file = new FileOutputStream(filename);
+		LinkedList<OrderReceipt> toReturn  = new LinkedList<>();
+		for(OrderReceipt o : this.list){
+			toReturn.add(o);
+		}
+		try(FileOutputStream file = new FileOutputStream(filename)){
 			ObjectOutputStream output = new ObjectOutputStream(file);
 			output.writeObject(this.list);
 			output.close();
-			file.close();
 		}catch (Exception e){ }
 	}
 }

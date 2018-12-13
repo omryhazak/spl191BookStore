@@ -36,8 +36,6 @@ public class SellingService extends MicroService {
 		this.duration = duration;
 
 
-
-
 	}
 
 	@Override
@@ -51,13 +49,13 @@ public class SellingService extends MicroService {
 
 			System.out.println(this.getName() + b.getCurrentTick());
 
-			if(b.getCurrentTick()==duration) terminate();
+			if (b.getCurrentTick() == duration) terminate();
 		});
 
 
 		//subscribing to the BookOrderEvent
 		subscribeEvent(BookOrderEvent.class, (BookOrderEvent e
-		) ->{
+		) -> {
 
 			//lambda implementation of bookOrderEvent callback
 			System.out.println("got book order event");
@@ -68,11 +66,11 @@ public class SellingService extends MicroService {
 			boolean holdKey = false;
 
 			//acquiring a a key to a customer
-			while(!holdKey){
-				try{
+			while (!holdKey) {
+				try {
 					e.getCustomer().semaphore.acquire();
 					holdKey = true;
-				}catch(Exception ex){
+				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			}
@@ -83,36 +81,26 @@ public class SellingService extends MicroService {
 			boolean customerHasEnoughMoney = (e.getCustomer().getAvailableCreditAmount() - bookPrice >= 0);
 
 			//check if the customer can afford the book
-			if(bookPrice == -1 || !customerHasEnoughMoney){
+			if (bookPrice == -1 || !customerHasEnoughMoney) {
 				complete(e, null);
-			}else{
+			} else {
 				Future<OrderResult> f2 = sendEvent(new TakeEvent(e.getBookTitle()));
 				OrderResult o = f2.get();
-				if(o == OrderResult.SUCCESSFULLY_TAKEN){
+				if (o == OrderResult.SUCCESSFULLY_TAKEN) {
 					moneyRegister.chargeCreditCard(e.getCustomer(), bookPrice);
-					toReturn = new OrderReceipt(0, this.getName(),e.getCustomer().getId(), e.getBookTitle(), bookPrice, this.currentTime.get(), orderTick, processTick);
+					toReturn = new OrderReceipt(0, this.getName(), e.getCustomer().getId(), e.getBookTitle(), bookPrice, this.currentTime.get(), orderTick, processTick);
+					e.getCustomer().addReceipt(toReturn);
 					moneyRegister.file(toReturn);
-					complete(e,toReturn);
-				}
-				else complete(e, null);
+					complete(e, toReturn);
+				} else complete(e, null);
 			}
 			e.getCustomer().semaphore.release();
-
 
 
 		});
 
 
-
-
-
 	}
-
-
-//	this.name = name;
-//	terminated = false;
-//	eventsToSubscribe = new ConcurrentLinkedQueue<>();
-//	mapOfCallbacksForBroadcasts = new ConcurrentHashMap<>();
-//	mapOfCallbacksForEvents = new ConcurrentHashMap<>();
-//	MB = MessageBusImpl.getInstance();
 }
+
+

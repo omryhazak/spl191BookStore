@@ -116,14 +116,13 @@ public class Customer implements Serializable {
 	 * Sets the amount of money left on this customers credit card.
 	 */
 	public  void chargeCustomer(int charge) {
-		synchronized ((Integer)availableAmountInCard) {
 			availableAmountInCard = availableAmountInCard - charge;
-		}
 	}
 
 
 	// initial the customer in case the json file created, instead of regular constructor
 	public void initialCustomer(){
+		this.receiptList = new LinkedList<>();
 		this.semaphore = new Semaphore(1);
 		this.creditCardNumber =this.creditCard.getNumber();
 		this.availableAmountInCard = this.creditCard.getAmount();

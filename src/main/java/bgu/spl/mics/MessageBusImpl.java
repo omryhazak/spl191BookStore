@@ -123,6 +123,7 @@ public class MessageBusImpl implements MessageBus {
         }
         else{
             resolveAllFutures();
+            System.exit(12);
         }
         return null;
     }

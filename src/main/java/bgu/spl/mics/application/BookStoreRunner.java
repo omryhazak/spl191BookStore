@@ -30,8 +30,8 @@ public class BookStoreRunner {
         HashMap<Integer, Customer> customersHashMap = initialCustomerHashMap(parser);
         parser.getServices().startProgram();
         generateOutputFiles(moneyRegister,inventory, customersHashMap, args[1] , args[2] , args[3], args[4]);
-        moneyRegister.printOrderReceipts(args[1]);
-        inventory.printInventoryToFile(args[2]);
+
+
 
 
 
