@@ -49,6 +49,7 @@ public class SellingService extends MicroService {
 			////lambda implementation of Tick Broadcast callback
 			if(b.getCurrentTick()==duration+1) terminate();
 		});
+		System.out.println(this.getName() + "subscribed to tickBroadcast");
 
 		//subscribing to the BookOrderEvent
 		subscribeEvent(BookOrderEvent.class, (BookOrderEvent e

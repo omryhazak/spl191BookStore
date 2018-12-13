@@ -162,9 +162,8 @@ public abstract class MicroService implements Runnable {
         System.out.println(this.getName() + " is running");
         MB.register(this);
         initialize();
-        System.out.println(this.getName() + " initialized");
         while (!terminated) {
-            System.out.println(this.getName() + " is in the house bitchezzzz");
+
             //while not interrupted, keep doing your job
             try{
                 Message message = MB.awaitMessage(this);

@@ -21,7 +21,7 @@ import java.util.Scanner;
 public class BookStoreRunner {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String s = "/users/studs/bsc/2019/nirsti/Desktop/yearB/semesterA/spl/input.json";
+        String s = "C:\\Users\\nir stiassnie\\Desktop\\Nir\\University\\yearB\\semster A\\spl/input.json";
         MessageBus mb = MessageBusImpl.getInstance();
         startProgram(s);
 
