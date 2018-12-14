@@ -7,6 +7,8 @@ import bgu.spl.mics.application.messages.ReturnVehicle;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
+
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -22,12 +24,14 @@ public class ResourceService extends MicroService{
 
 	private ResourcesHolder resourcesHolder;
 	private int duration;
+	private CountDownLatch countDownLatch;
 
 
-	public ResourceService(String name, int duration) {
+	public ResourceService(String name, int duration, CountDownLatch countDownLatch) {
 		super(name);
 		resourcesHolder = ResourcesHolder.getInstance();
 		this.duration = duration;
+		this.countDownLatch = countDownLatch;
 	}
 
 	@Override
@@ -37,7 +41,6 @@ public class ResourceService extends MicroService{
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
 			////lambda implementation of Tick Broadcast callback
-			System.out.println(this.getName() + "got at tickkkkkkkkkkkkk");
 
 			if(b.getCurrentTick()==duration) terminate();
 		});
@@ -60,5 +63,6 @@ public class ResourceService extends MicroService{
 			//return a vehicle to the resource holder
 			resourcesHolder.releaseVehicle(e.getDeliveryVehicle());
 		});
+		this.countDownLatch.countDown();
 	}
 }

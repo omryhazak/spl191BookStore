@@ -29,6 +29,7 @@ public class BookStoreRunner {
         MoneyRegister moneyRegister = MoneyRegister.getInstance();
         HashMap<Integer, Customer> customersHashMap = initialCustomerHashMap(parser);
         parser.getServices().startProgram();
+        System.out.println("i am fucking ending");
         generateOutputFiles(moneyRegister,inventory, customersHashMap, args[1] , args[2] , args[3], args[4]);
 
 

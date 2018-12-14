@@ -6,6 +6,7 @@ import bgu.spl.mics.application.services.*;
 
 
 import java.util.LinkedList;
+import java.util.concurrent.CountDownLatch;
 
 public class Services {
 
@@ -14,8 +15,11 @@ public class Services {
     private int inventoryService;
     private int logistics;
     private int resourcesService;
+    private int numOfServices;
     private Customer[] customers;
-    private LinkedList<MicroService> microServices = new LinkedList<>();
+    private MicroService[] microServices;
+    private Thread[] threadsArray;
+    private CountDownLatch countDownLatch;
 
 
 
@@ -26,69 +30,84 @@ public class Services {
     }
 
     public void startProgram(){
+
+        this.numOfServices = selling+inventoryService+logistics+resourcesService+customers.length;
+        this.threadsArray = new Thread[numOfServices];
+        countDownLatch = new CountDownLatch(numOfServices);
+        int counter = 0;
         System.out.println("starting the program");
+
+        //initial the customers
         initialCustomers();
 
+        //initial the time service
         TimeService timeService = new TimeService(this.time.getSpeed(), this.time.getDuration());
         setTime(timeService);
 
-
+        //creating the micro service based Threads and run them
         for(int i=1; i <= selling; i++){
-            SellingService toRun = new SellingService("sellingService" + i, (int) timeService.getDuration());
-            microServices.add(toRun);
+            Thread t = new Thread( new SellingService("sellingService" + i, (int) timeService.getDuration(), countDownLatch));
+            threadsArray[counter] = t;
+            counter++;
+            t.start();
         }
 
         for(int i=1; i <= inventoryService; i++){
-            InventoryService toRun = new InventoryService("inventoryService" + i, (int) timeService.getDuration());
-            microServices.add(toRun);
+            Thread t  = new Thread(new InventoryService("inventoryService" + i, (int) timeService.getDuration(), countDownLatch));
+            threadsArray[counter] = t;
+            counter++;
+            t.start();
 
         }
 
 
         for(int i=1; i <= logistics; i++){
-            LogisticsService toRun = new LogisticsService("logisticsService" + i, (int) timeService.getDuration());
-            microServices.add(toRun);
+           Thread t = new Thread(new LogisticsService("logisticsService" + i, (int) timeService.getDuration(), countDownLatch));
+            threadsArray[counter] = t;
+            counter++;
+            t.start();
 
         }
 
         for(int i=1; i <= resourcesService; i++){
-            ResourceService toRun = new ResourceService("resourceService" + i, (int) timeService.getDuration());
-            microServices.add(toRun);
+            Thread t = new Thread(new ResourceService("resourceService" + i, (int) timeService.getDuration(), countDownLatch));
+            threadsArray[counter] = t;
+            counter++;
+            t.start();
 
         }
 
         for(int i=0; i < customers.length; i++){
-            APIService toRun = new APIService("apiService" + (i+1), customers[i], (int) timeService.getDuration());
-            microServices.add(toRun);
+            Thread t = new Thread(new APIService("apiService" + (i+1), customers[i], (int) timeService.getDuration(), countDownLatch));
+            threadsArray[counter] = t;
+            counter++;
+            t.start();
         }
 
-        //creating the threads by their order
-        boolean isNull = false;
-        while(!isNull){
-            MicroService m = microServices.pollFirst();
-            if(m != null){
-//                try {
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-                Thread t = new Thread(m);
-                t.start();
 
-            }
-            else isNull = true;
-        }
 
         //create the timeService thread
         //we want the time service to start ticking only after all other threads initialized
-        // so we force the main thread to sleep before creating it, in order to let all other threads to subscribe to tick broadcast
-        Thread t = Thread.currentThread();
-        try {
-            t.sleep(1000);
-
-        } catch (InterruptedException e) { }
+        // so we force the main thread to wait until they all subscribe before starting the time service
         Thread t2 = new Thread(timeService);
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            System.out.println("NOT EVERYONE WAS SUBSCRIBED");
+        }
         t2.start();
+        try {
+            t2.join();
+        } catch (InterruptedException e) {}
+        for(int j=0; j<threadsArray.length; j++){
+            try {
+                threadsArray[j].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+
     }
 
 

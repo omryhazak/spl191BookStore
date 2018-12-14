@@ -7,6 +7,7 @@ import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.OrderResult;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -23,11 +24,13 @@ public class InventoryService extends MicroService {
 
 	private Inventory inventory;
 	private int duration;
+	private CountDownLatch countDownLatch;
 
-	public InventoryService(String name, int duration) {
+	public InventoryService(String name, int duration, CountDownLatch countDownLatch) {
 		super(name);
 		inventory = Inventory.getInstance();
 		this.duration = duration;
+		this.countDownLatch = countDownLatch;
 	}
 
 	@Override
@@ -47,7 +50,7 @@ public class InventoryService extends MicroService {
 			complete(e, inventory.take(e.getBookTitle()));
 		});
 
-
+		this.countDownLatch.countDown();
 	}
 
 }

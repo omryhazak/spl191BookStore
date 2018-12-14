@@ -10,6 +10,7 @@ import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 import bgu.spl.mics.application.passiveObjects.OrderReceipt;
 import bgu.spl.mics.application.passiveObjects.OrderResult;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -27,13 +28,15 @@ public class SellingService extends MicroService {
 	private AtomicInteger currentTime;
 	private MoneyRegister moneyRegister;
 	private int duration;
+	private CountDownLatch countDownLatch;
 
 
-	public SellingService(String name, int duration) {
+	public SellingService(String name, int duration, CountDownLatch countDownLatch) {
 		super(name);
 		moneyRegister = MoneyRegister.getInstance();
 		this.currentTime = new AtomicInteger(1);
 		this.duration = duration;
+		this.countDownLatch = countDownLatch;
 
 
 	}
@@ -47,7 +50,6 @@ public class SellingService extends MicroService {
 			////lambda implementation of Tick Broadcast callback
 			this.currentTime.set(b.getCurrentTick());
 
-			System.out.println(this.getName() + b.getCurrentTick());
 
 			if (b.getCurrentTick() == duration) terminate();
 		});
@@ -58,8 +60,7 @@ public class SellingService extends MicroService {
 		) -> {
 
 			//lambda implementation of bookOrderEvent callback
-			System.out.println("got book order event");
-
+			System.out.println(this.getName() + " got a book order");
 			int processTick = this.currentTime.get();
 			OrderReceipt toReturn = null;
 			int orderTick = e.getOrderTick().get();
@@ -77,7 +78,11 @@ public class SellingService extends MicroService {
 
 			//check availability of the book
 			Future<Integer> f1 = sendEvent(new CheckAvailabilityEvent(e.getBookTitle(), e.getCustomer()));
+
+
 			int bookPrice = f1.get();
+
+
 			boolean customerHasEnoughMoney = (e.getCustomer().getAvailableCreditAmount() - bookPrice >= 0);
 
 			//check if the customer can afford the book
@@ -98,6 +103,7 @@ public class SellingService extends MicroService {
 
 
 		});
+		this.countDownLatch.countDown();
 
 
 	}

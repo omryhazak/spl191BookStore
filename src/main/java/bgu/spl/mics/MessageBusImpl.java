@@ -1,7 +1,6 @@
 package bgu.spl.mics;
 import bgu.spl.mics.application.messages.ResolveAllFutures;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.*;
 
@@ -59,18 +58,12 @@ public class MessageBusImpl implements MessageBus {
 
     @Override
     public  <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-        synchronized (lock1) {
             subscribeMessage(type, m, mapOfEvents);
-        }
     }
 
     @Override
     public  void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-        synchronized (lock2) {
-
             subscribeMessage(type, m, mapOfBroadcasts);
-            System.out.println(m.getName() + " was subscribed");
-        }
     }
 
 
@@ -100,38 +93,39 @@ public class MessageBusImpl implements MessageBus {
     @Override
     public <T> Future<T> sendEvent(Event<T> e) {
 
+        Future<T> f = new Future<T>();
+        mapOfFutures.put(e, f);
+
         if (!e.getClass().equals(ResolveAllFutures.class)) {
-            Future<T> f = new Future<T>();
             Object lock = new Object();
             MicroService m;
-
-            if (mapOfEvents.get(e.getClass()) != null) {
+            if (mapOfEvents.get(e.getClass()).size() != 0) {
                 try {
                     synchronized (lock) {
                         m = mapOfEvents.get(e.getClass()).getFirst();
                         mapOfEvents.get(e.getClass()).addLast(m);
                     }
                     mapOfMS.get(m).add(e);
-                    mapOfFutures.put(e, f);
                     return f;
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             } else {
-                return null;
+                f.resolve(null);
+                mapOfFutures.remove(f);
             }
         }
         else{
+            f.resolve(null);
+            mapOfFutures.remove(f);
             resolveAllFutures();
-            System.exit(12);
         }
-        return null;
+        return f;
     }
 
     private void resolveAllFutures() {
         for (Future f : mapOfFutures.values()){
             f.resolve(null);
-            System.out.println("f resolved");
         }
     }
 
@@ -177,19 +171,20 @@ public class MessageBusImpl implements MessageBus {
 
     private void subscribeMessage(Class<? extends Message> type, MicroService m, ConcurrentHashMap<Object, LinkedList<MicroService>> map) {
         //if there is no Q for event E, we will create one
-        if (map.get(type) == null) {
-            LinkedList q = new LinkedList();
-            try {
-                map.put(type, q);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        else {
-            try {
-                map.get(type).add(m);
-            } catch (Exception e) {
-                e.printStackTrace();
+        synchronized (lock1) {
+            if (map.get(type) == null) {
+                LinkedList q = new LinkedList();
+                try {
+                    map.put(type, q);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    map.get(type).add(m);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

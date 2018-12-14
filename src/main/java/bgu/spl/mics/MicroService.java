@@ -157,7 +157,6 @@ public abstract class MicroService implements Runnable {
      */
     @Override
     public final void run() {
-        System.out.println(this.getName() + " is fucking running");
         MB.register(this);
         initialize();
         while (!terminated) {
@@ -165,12 +164,6 @@ public abstract class MicroService implements Runnable {
             //while not interrupted, keep doing your job
             try{
                 Message message = MB.awaitMessage(this);
-
-
-                if (message == null) {
-                    System.out.println("just a little problem");
-                }
-
                 mapOfCallbacks.get(message.getClass()).call(message);
 
             }catch (InterruptedException e) {}

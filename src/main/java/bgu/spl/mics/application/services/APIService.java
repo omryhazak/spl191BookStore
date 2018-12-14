@@ -11,6 +11,7 @@ import bgu.spl.mics.application.passiveObjects.OrderSchedule;
 
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -26,11 +27,13 @@ public class APIService extends MicroService {
 
 	private Customer customer;
 	private int duration;
+	private CountDownLatch countDownLatch;
 
-	public APIService(String name, Customer customer, int duration) {
+	public APIService(String name, Customer customer, int duration, CountDownLatch countDownLatch) {
 		super(name);
 		this.customer = customer;
 		this.duration = duration;
+		this.countDownLatch = countDownLatch;
 
 	}
 
@@ -43,7 +46,6 @@ public class APIService extends MicroService {
 		//lambda implementation of Tick Broadcast callback
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
-			System.out.println(this.getName() +" got a tick " + b.getCurrentTick());
 
 			//checks if there is an order should be sent by going over the sorted list.
 
@@ -82,6 +84,6 @@ public class APIService extends MicroService {
 				this.terminate();
 			}
 		});
-
+		this.countDownLatch.countDown();
 	}
 }

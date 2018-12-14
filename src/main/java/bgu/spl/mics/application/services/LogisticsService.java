@@ -8,6 +8,7 @@ import bgu.spl.mics.application.messages.ReturnVehicle;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -22,12 +23,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class LogisticsService extends MicroService {
 
 	private int duration;
+	private CountDownLatch countDownLatch;
 
 
 
-	public LogisticsService(String name, int duration) {
+	public LogisticsService(String name, int duration, CountDownLatch countDownLatch) {
 		super(name);
 		this.duration = duration;
+		this.countDownLatch = countDownLatch;
 	}
 
 	@Override
@@ -36,20 +39,33 @@ public class LogisticsService extends MicroService {
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
 			////lambda implementation of Tick Broadcast callback
+
+			System.out.println(this.getName() + " " + b.getCurrentTick());
+
 			if(b.getCurrentTick()==duration) terminate();
 		});
 
 		subscribeEvent(DeliveryEvent.class, (DeliveryEvent e) ->{
 
 			//sending event checkVehicle in order to get vehicle from resource service and gets future that will be resolved later into vehicle
+
+			System.out.println(this.getName() + " get car for mission");
+
 			Future<Future<DeliveryVehicle>> f1 = sendEvent(new CheckVehicle());
 
 			//after vehicle was resolved, sending the vehicle with deliver
 			DeliveryVehicle deliveryVehicle = f1.get().get();
+
+			System.out.println(this.getName() + " send car on mission");
+
 			deliveryVehicle.deliver(e.getCustomer().getAddress(), e.getCustomer().getDistance());
 
 			//after delivery was done, releasing the vehicle using returnVehicle event.
+
+			System.out.println(this.getName() + " return a car from mission");
+
 			sendEvent(new ReturnVehicle(deliveryVehicle));
 		});
+		this.countDownLatch.countDown();
 	}
 }
