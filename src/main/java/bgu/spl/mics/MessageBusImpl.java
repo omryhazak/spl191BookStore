@@ -164,8 +164,17 @@ public class MessageBusImpl implements MessageBus {
 
     @Override
     public Message awaitMessage(MicroService m) throws InterruptedException {
+        BlockingQueue<Message> b = mapOfMS.get(m);
+        if(b== null){
+            System.out.println(m.getName() + " has a null message queue");
+        }
+        if(b.isEmpty()){
+            System.out.println(m.getName() + " has an empty message queue");
+        }
 
-        return mapOfMS.get(m).take();
+        Message messageToReturn = mapOfMS.get(m).take();
+        System.out.println(m.getName() + " is after take in await");
+        return messageToReturn;
     }
 
 
@@ -176,6 +185,7 @@ public class MessageBusImpl implements MessageBus {
                 LinkedList q = new LinkedList();
                 try {
                     map.put(type, q);
+                    map.get(type).add(m);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

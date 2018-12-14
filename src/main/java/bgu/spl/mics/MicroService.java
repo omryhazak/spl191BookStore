@@ -158,13 +158,19 @@ public abstract class MicroService implements Runnable {
     @Override
     public final void run() {
         MB.register(this);
+        System.out.println(this.getName() + " is registered");
         initialize();
+        System.out.println(this.getName() + " is initialized");
         while (!terminated) {
 
             //while not interrupted, keep doing your job
             try{
+                System.out.println(this.getName() + " is in the loop1");
                 Message message = MB.awaitMessage(this);
+                System.out.println(this.getName() + " is in the hood");
                 mapOfCallbacks.get(message.getClass()).call(message);
+                System.out.println(this.getName() + " is in the loop2");
+
 
             }catch (InterruptedException e) {}
         }
