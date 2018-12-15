@@ -67,9 +67,8 @@ public class APIService extends MicroService {
 
 					//checking the result from the book order event.
 					//according to that, decide if send delivery event
-					if(orderReceipt != null) { //than the book order was successfully executed
+					if(orderReceipt != null) {//than the book order was successfully executed
 						Future f2 = sendEvent(new DeliveryEvent(customer));
-
 					}
 				}
 				else {

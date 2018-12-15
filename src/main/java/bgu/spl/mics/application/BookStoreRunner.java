@@ -30,6 +30,7 @@ public class BookStoreRunner {
 
         MoneyRegister moneyRegister = MoneyRegister.getInstance();
         parser.getServices().startProgram();
+        System.out.println(moneyRegister.getTotalEarnings());
 
         generateOutputFiles(moneyRegister,inventory, initialCustomerHashMap(parser), args[1] , args[2] , args[3], args[4]);
 

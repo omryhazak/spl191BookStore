@@ -78,7 +78,6 @@ public class Inventory implements Serializable {
 	 * @post: if  checkAvailabiltyAndGetPrice({@param book}) != (-1), setAmountInInventory({@param book})
      */
 	public OrderResult take (String book) {
-
 		BookInventoryInfo b = inv.get(book);
 		OrderResult orderResult=null;
 

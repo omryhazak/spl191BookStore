@@ -60,7 +60,6 @@ public class SellingService extends MicroService {
 			//lambda implementation of bookOrderEvent callback
 
 
-
 			int processTick = this.currentTime.get();
 			OrderReceipt toReturn = null;
 			int orderTick = e.getOrderTick().get();
@@ -87,6 +86,7 @@ public class SellingService extends MicroService {
 
 			//check if the customer can afford the book
 			if (bookPrice == -1 || !customerHasEnoughMoney) {
+
 				complete(e, null);
 			} else {
 				Future<OrderResult> f2 = sendEvent(new TakeEvent(e.getBookTitle()));
@@ -97,7 +97,9 @@ public class SellingService extends MicroService {
 					e.getCustomer().addReceipt(toReturn);
 					moneyRegister.file(toReturn);
 					complete(e, toReturn);
-				} else complete(e, null);
+				} else {
+					complete(e, null);
+				}
 			}
 			e.getCustomer().semaphore.release();
 
