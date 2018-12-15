@@ -17,22 +17,21 @@ import java.util.*;
  */
 public class BookStoreRunner {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
 
         MessageBus mb = MessageBusImpl.getInstance();
         Parser parser = startParsing(args[0]);
         parser.initialBooksSemaphore();
+
         Inventory inventory = Inventory.getInstance();
         inventory.load(parser.getInitialInventory());
+
         ResourcesHolder resourcesHolder = ResourcesHolder.getInstance();
         resourcesHolder.load(parser.getInitialResources()[0].getDeliveryVehicles());
+
         MoneyRegister moneyRegister = MoneyRegister.getInstance();
-        HashMap<Integer, Customer> customersHashMap = initialCustomerHashMap(parser);
         parser.getServices().startProgram();
-        generateOutputFiles(moneyRegister,inventory, customersHashMap, args[1] , args[2] , args[3], args[4]);
 
-
-
+        generateOutputFiles(moneyRegister,inventory, initialCustomerHashMap(parser), args[1] , args[2] , args[3], args[4]);
 
 
     }
@@ -40,9 +39,8 @@ public class BookStoreRunner {
     //creating the parsed json object
     private static Parser startParsing(String filePath) {
         Parser parser = null;
-        try {
+        try(JsonReader reader = new JsonReader(new FileReader(filePath))) {
             Gson gson = new Gson();
-            JsonReader reader = new JsonReader(new FileReader(filePath));
             parser = gson.fromJson(reader, Parser.class);
 
         } catch (FileNotFoundException e) {
@@ -66,20 +64,19 @@ public class BookStoreRunner {
     private static void generateOutputFiles(MoneyRegister m, Inventory inv,HashMap<Integer, Customer> customersHashMap, String s1,String s2,String s3,String s4){
         m.printOrderReceipts(s1);
         inv.printInventoryToFile(s2);
-        try{
-            FileOutputStream file = new FileOutputStream(s3);
+        try(FileOutputStream file = new FileOutputStream(s3)){
             ObjectOutputStream output = new ObjectOutputStream(file);
             output.writeObject(m);
             output.close();
-            file.close();
-        }catch (Exception e){ }
-        try{
-            FileOutputStream file = new FileOutputStream(s4);
+        }catch (Exception e){
+            System.out.println("bkldfgrlrnfio");
+        }
+        try(FileOutputStream file = new FileOutputStream(s4)){
             ObjectOutputStream output = new ObjectOutputStream(file);
             output.writeObject(customersHashMap);
             output.close();
-            file.close();
-        }catch (Exception e){ }
+        }catch (Exception e){
+        }
 
 
 

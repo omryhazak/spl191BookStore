@@ -35,25 +35,25 @@ public class Services {
         this.threadsArray = new Thread[numOfServices];
         countDownLatch = new CountDownLatch(numOfServices);
         int counter = 0;
-        System.out.println("starting the program");
 
         //initial the customers
         initialCustomers();
 
         //initial the time service
-        TimeService timeService = new TimeService(this.time.getSpeed(), this.time.getDuration());
-        setTime(timeService);
+
+
 
         //creating the micro service based Threads and run them
+        // also adding them into the threads array
         for(int i=1; i <= selling; i++){
-            Thread t = new Thread( new SellingService("sellingService" + i, (int) timeService.getDuration(), countDownLatch));
+            Thread t = new Thread( new SellingService("sellingService" + i, (int) time.getDuration(), countDownLatch));
             threadsArray[counter] = t;
             counter++;
             t.start();
         }
 
         for(int i=1; i <= inventoryService; i++){
-            Thread t  = new Thread(new InventoryService("inventoryService" + i, (int) timeService.getDuration(), countDownLatch));
+            Thread t  = new Thread(new InventoryService("inventoryService" + i, (int) time.getDuration(), countDownLatch));
             threadsArray[counter] = t;
             counter++;
             t.start();
@@ -62,7 +62,7 @@ public class Services {
 
 
         for(int i=1; i <= logistics; i++){
-           Thread t = new Thread(new LogisticsService("logisticsService" + i, (int) timeService.getDuration(), countDownLatch));
+           Thread t = new Thread(new LogisticsService("logisticsService" + i, (int) time.getDuration(), countDownLatch));
             threadsArray[counter] = t;
             counter++;
             t.start();
@@ -70,7 +70,7 @@ public class Services {
         }
 
         for(int i=1; i <= resourcesService; i++){
-            Thread t = new Thread(new ResourceService("resourceService" + i, (int) timeService.getDuration(), countDownLatch));
+            Thread t = new Thread(new ResourceService("resourceService" + i, (int) time.getDuration(), countDownLatch));
             threadsArray[counter] = t;
             counter++;
             t.start();
@@ -78,7 +78,7 @@ public class Services {
         }
 
         for(int i=0; i < customers.length; i++){
-            Thread t = new Thread(new APIService("apiService" + (i+1), customers[i], (int) timeService.getDuration(), countDownLatch));
+            Thread t = new Thread(new APIService("apiService" + (i+1), customers[i], (int) time.getDuration(), countDownLatch));
             threadsArray[counter] = t;
             counter++;
             t.start();
@@ -89,7 +89,7 @@ public class Services {
         //create the timeService thread
         //we want the time service to start ticking only after all other threads initialized
         // so we force the main thread to wait until they all subscribe before starting the time service
-        Thread t2 = new Thread(timeService);
+        Thread t2 = new Thread(new TimeService(this.time.getSpeed(), this.time.getDuration()));
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
@@ -98,12 +98,14 @@ public class Services {
         t2.start();
         try {
             t2.join();
-        } catch (InterruptedException e) {}
+        } catch (InterruptedException e) {
+            t2.interrupt();
+        }
         for(int j=0; j<threadsArray.length; j++){
             try {
                 threadsArray[j].join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                threadsArray[j].interrupt();
             }
         }
 
@@ -135,8 +137,6 @@ public class Services {
         return customers;
     }
 
-    public void setTime(TimeService t){
-        t.setTimeService();
-    }
+
 
 }

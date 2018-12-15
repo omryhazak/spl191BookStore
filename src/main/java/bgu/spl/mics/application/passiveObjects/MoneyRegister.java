@@ -89,6 +89,8 @@ public class MoneyRegister  implements Serializable {
 			ObjectOutputStream output = new ObjectOutputStream(file);
 			output.writeObject(this.list);
 			output.close();
-		}catch (Exception e){ }
+		}catch (Exception e){
+			System.out.println("im in receipts");
+		}
 	}
 }

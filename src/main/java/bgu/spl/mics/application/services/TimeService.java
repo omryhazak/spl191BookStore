@@ -43,7 +43,6 @@ public class TimeService extends MicroService {
 			public void run() {
 
 				sendBroadcast(new TickBroadcast(currentTime));
-				System.out.println(currentTime);
 				currentTime++;
 				if(currentTime == duration+1) {
 
@@ -59,35 +58,15 @@ public class TimeService extends MicroService {
 	@Override
 	protected void initialize() {
 
-		timer.scheduleAtFixedRate(timerTask, 30, 30);
+		timer.scheduleAtFixedRate(timerTask, 0, 30);
 		try {
-			Thread.sleep(30*25);
+			Thread.sleep(30*24);
 		} catch (InterruptedException e) {
 			System.out.println("TIME SERVICE WAS INTERRUPTED WHILE SLEEPING");;
 		}
+		this.terminate();
 	}
 
-	public void setTimeService(){
-		currentTime = 1;
-		timer = new Timer();
-		timerTask = new TimerTask()
-				//start annonymous class
-		{
-			@Override
-			public void run() {
-				sendBroadcast(new TickBroadcast(currentTime));
-				System.out.println(currentTime);
-				currentTime++;
-				if(currentTime == duration+1) {
-
-					timerTask.cancel();
-					timer.cancel();
-					sendEvent(new ResolveAllFutures());
-					terminate();
-				}
-			}
-		};
-	}
 
 	public long getDuration() {
 		return duration;
@@ -97,9 +76,6 @@ public class TimeService extends MicroService {
 		return speed;
 	}
 
-	private void terminateTimeService(){
-		this.terminate();
-	}
 }
 
 

@@ -78,14 +78,12 @@ public class Inventory implements Serializable {
 	 * @post: if  checkAvailabiltyAndGetPrice({@param book}) != (-1), setAmountInInventory({@param book})
      */
 	public OrderResult take (String book) {
-		System.out.println("trying to take a book!");
 		BookInventoryInfo b = inv.get(book);
 		OrderResult orderResult=null;
 
 		if (b.semaphore.tryAcquire()) {
 			b.reduceAmountInInventory();
 			orderResult = OrderResult.SUCCESSFULLY_TAKEN;
-			System.out.println("took a book!");
 		}
 		else {
 			orderResult = OrderResult.NOT_IN_STOCK;
@@ -127,13 +125,13 @@ public class Inventory implements Serializable {
      */
 	public void printInventoryToFile(String filename){
 		HashMap<String, Integer> booksHashMap = this.createBooksHashMap();
-		try{
-			FileOutputStream file = new FileOutputStream(filename);
+		try(FileOutputStream file = new FileOutputStream(filename)){
 			ObjectOutputStream output = new ObjectOutputStream(file);
 			output.writeObject(booksHashMap);
 			output.close();
-			file.close();
-		}catch (Exception e){ }
+		}catch (Exception e){
+			System.out.println("im in inventory");
+		}
 	}
 
 	//creating the book hash map to return in output file
