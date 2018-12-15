@@ -49,8 +49,6 @@ public class SellingService extends MicroService {
 
 			////lambda implementation of Tick Broadcast callback
 			this.currentTime.set(b.getCurrentTick());
-
-			System.out.println(this.getName() + " got " + this.currentTime + " tick  kjbvlsdfpjbgsopdfggfasdgsdghsfgsfgsgsdf");
 			if (b.getCurrentTick() == duration) terminate();
 		});
 
@@ -60,7 +58,6 @@ public class SellingService extends MicroService {
 		) -> {
 
 			//lambda implementation of bookOrderEvent callback
-			System.out.println(this.getName() + " got a book order");
 			int processTick = this.currentTime.get();
 			OrderReceipt toReturn = null;
 			int orderTick = e.getOrderTick().get();

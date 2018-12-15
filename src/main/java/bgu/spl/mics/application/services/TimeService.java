@@ -65,7 +65,6 @@ public class TimeService extends MicroService {
 		} catch (InterruptedException e) {
 			System.out.println("TIME SERVICE WAS INTERRUPTED WHILE SLEEPING");;
 		}
-		System.out.println("END OF INITIAL");
 	}
 
 	public void setTimeService(){
