@@ -78,6 +78,7 @@ public class Inventory implements Serializable {
 	 * @post: if  checkAvailabiltyAndGetPrice({@param book}) != (-1), setAmountInInventory({@param book})
      */
 	public OrderResult take (String book) {
+
 		BookInventoryInfo b = inv.get(book);
 		OrderResult orderResult=null;
 
@@ -125,10 +126,8 @@ public class Inventory implements Serializable {
      */
 	public void printInventoryToFile(String filename){
 		HashMap<String, Integer> booksHashMap = this.createBooksHashMap();
-		try(FileOutputStream file = new FileOutputStream(filename)){
-			ObjectOutputStream output = new ObjectOutputStream(file);
+		try(FileOutputStream file = new FileOutputStream(filename); ObjectOutputStream output = new ObjectOutputStream(file)){
 			output.writeObject(booksHashMap);
-			output.close();
 		}catch (Exception e){
 			System.out.println("im in inventory");
 		}

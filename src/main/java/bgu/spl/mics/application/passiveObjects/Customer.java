@@ -25,14 +25,14 @@ public class Customer implements Serializable {
 	private int availableAmountInCard;
 	private int creditCardNumber;
 	private CreditCard creditCard;
-	private List<OrderReceipt> receiptList;
+	private LinkedList<OrderReceipt> receiptList;
 	private LinkedList<OrderSchedule> orderScheduleList;
 	private OrderSchedule[] orderSchedule;
 	public Semaphore semaphore;
 
 
 	//constructor
-	public Customer(int id, String name, String address, int distance,CreditCard creditCard,  List<OrderReceipt> receiptList, int creditCardNumber, int availableAmountInCard, OrderSchedule[] orderSchedule){
+	public Customer(int id, String name, String address, int distance, CreditCard creditCard,  LinkedList<OrderReceipt> receiptList, int creditCardNumber, int availableAmountInCard, OrderSchedule[] orderSchedule){
 		this.id = id;
 		this.name = name;
 		this.address = address;
@@ -119,6 +119,9 @@ public class Customer implements Serializable {
 			availableAmountInCard = availableAmountInCard - charge;
 	}
 
+	public CreditCard getCreditCard() {
+		return creditCard;
+	}
 
 	// initial the customer in case the json file created, instead of regular constructor
 	public void initialCustomer(){

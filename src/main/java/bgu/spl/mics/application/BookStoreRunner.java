@@ -64,18 +64,15 @@ public class BookStoreRunner {
     private static void generateOutputFiles(MoneyRegister m, Inventory inv,HashMap<Integer, Customer> customersHashMap, String s1,String s2,String s3,String s4){
         m.printOrderReceipts(s1);
         inv.printInventoryToFile(s2);
-        try(FileOutputStream file = new FileOutputStream(s3)){
-            ObjectOutputStream output = new ObjectOutputStream(file);
+        try(FileOutputStream file = new FileOutputStream(s3); ObjectOutputStream output = new ObjectOutputStream(file)){
             output.writeObject(m);
-            output.close();
         }catch (Exception e){
             System.out.println("bkldfgrlrnfio");
         }
-        try(FileOutputStream file = new FileOutputStream(s4)){
-            ObjectOutputStream output = new ObjectOutputStream(file);
+        try(FileOutputStream file = new FileOutputStream(s4); ObjectOutputStream output = new ObjectOutputStream(file)){
             output.writeObject(customersHashMap);
-            output.close();
         }catch (Exception e){
+            System.out.println("im in customer");
         }
 
 

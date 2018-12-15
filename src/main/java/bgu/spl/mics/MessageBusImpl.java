@@ -79,6 +79,7 @@ public class MessageBusImpl implements MessageBus {
     public void sendBroadcast(Broadcast b) {
         synchronized (lock3) {
             LinkedList<MicroService> microServiceLinkedList = mapOfBroadcasts.get(b.getClass());
+            if(microServiceLinkedList==null) System.out.println("fuckingshit");
             MicroService microService;
             int counter = 0;
             while (counter < microServiceLinkedList.size()) {
@@ -139,7 +140,7 @@ public class MessageBusImpl implements MessageBus {
 
     @Override
     public void unregister(MicroService m) {
-
+        //TODO when the last ms get out, close the door
         //delelte m's queue and all the messages from it
         LinkedList<Message> queue = new LinkedList<>();
 //        mapOfMS.get(m).drainTo(queue);

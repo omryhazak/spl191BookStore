@@ -5,7 +5,6 @@ import bgu.spl.mics.application.passiveObjects.Customer;
 import bgu.spl.mics.application.services.*;
 
 
-import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
 
 public class Services {

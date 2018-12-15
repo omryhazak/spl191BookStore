@@ -60,6 +60,8 @@ public class APIService extends MicroService {
 					//we will keep on doing it until the first book which it is not his time to be ordered.
 					//i changed the first argument of the new book order event
 					Future<OrderReceipt> f1 = sendEvent(new BookOrderEvent(customer.getOrderScheduleList().getFirst().getBookTitle() , customer, b.getCurrentTick()));
+
+
 					customer.getOrderScheduleList().pollFirst();
 					OrderReceipt orderReceipt = f1.get();
 

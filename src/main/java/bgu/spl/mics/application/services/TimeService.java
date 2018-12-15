@@ -45,7 +45,7 @@ public class TimeService extends MicroService {
 				sendBroadcast(new TickBroadcast(currentTime));
 				currentTime++;
 				if(currentTime == duration+1) {
-
+					System.out.println(currentTime);
 					timerTask.cancel();
 					timer.cancel();
 					sendEvent(new ResolveAllFutures());
@@ -54,13 +54,13 @@ public class TimeService extends MicroService {
 			}
 		};
 	}
-
+//TODO time service send tick after everyone is dead
 	@Override
 	protected void initialize() {
 
-		timer.scheduleAtFixedRate(timerTask, 0, 30);
+		timer.scheduleAtFixedRate(timerTask, 0, speed);
 		try {
-			Thread.sleep(30*24);
+			Thread.sleep(speed*duration);
 		} catch (InterruptedException e) {
 			System.out.println("TIME SERVICE WAS INTERRUPTED WHILE SLEEPING");;
 		}
