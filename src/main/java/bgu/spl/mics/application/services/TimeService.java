@@ -41,20 +41,24 @@ public class TimeService extends MicroService {
 		{
 			@Override
 			public void run() {
+                if(currentTime == duration+1) {
+                    System.out.println("time service start dying");
+                    timerTask.cancel();
+                    timer.cancel();
+                    System.out.println("timers has canceled");
+                    terminate();
 
-				sendBroadcast(new TickBroadcast(currentTime));
-				currentTime++;
-				if(currentTime == duration+1) {
-					System.out.println(currentTime);
-					timerTask.cancel();
-					timer.cancel();
-					sendEvent(new ResolveAllFutures());
-					terminate();
-				}
-			}
+                }
+                else {
+                    sendBroadcast(new TickBroadcast(currentTime));
+                    System.out.println(currentTime);
+                }
+                if(currentTime==duration) sendEvent(new ResolveAllFutures());
+                currentTime++;
+            }
 		};
 	}
-//TODO time service send tick after everyone is dead
+
 	@Override
 	protected void initialize() {
 

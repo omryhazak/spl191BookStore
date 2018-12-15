@@ -79,7 +79,6 @@ public class MessageBusImpl implements MessageBus {
     public void sendBroadcast(Broadcast b) {
         synchronized (lock3) {
             LinkedList<MicroService> microServiceLinkedList = mapOfBroadcasts.get(b.getClass());
-            if(microServiceLinkedList==null) System.out.println("fuckingshit");
             MicroService microService;
             int counter = 0;
             while (counter < microServiceLinkedList.size()) {
@@ -142,7 +141,7 @@ public class MessageBusImpl implements MessageBus {
     public void unregister(MicroService m) {
         //TODO when the last ms get out, close the door
         //delelte m's queue and all the messages from it
-        LinkedList<Message> queue = new LinkedList<>();
+//        LinkedList<Message> queue = new LinkedList<>();
 //        mapOfMS.get(m).drainTo(queue);
 //        Iterator<Message> iterator = queue.listIterator();
 //        while(iterator.hasNext()){
@@ -152,13 +151,17 @@ public class MessageBusImpl implements MessageBus {
         mapOfMS.remove(m);
 
         //delete m's event subscription
-        for (LinkedList<MicroService> b : mapOfEvents.values()) {
-            b.remove(m);
+        //if the event's list is empty than remove it
+        for (Object o : mapOfEvents.keySet()) {
+            mapOfEvents.get(o).remove(m);
+            if(mapOfEvents.get(o).isEmpty()) mapOfEvents.remove(o);
         }
 
         //delete m's broadcast subscription
-        for (LinkedList<MicroService> l : mapOfBroadcasts.values()) {
-            l.remove(m);
+        //if the broadcast's list is empty than remove it
+        for (Object o : mapOfBroadcasts.keySet()) {
+            mapOfBroadcasts.get(o).remove(m);
+            if(mapOfBroadcasts.get(o).isEmpty()) mapOfBroadcasts.remove(o);
         }
 
     }
