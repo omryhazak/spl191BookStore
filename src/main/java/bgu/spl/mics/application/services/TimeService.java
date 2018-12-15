@@ -42,12 +42,9 @@ public class TimeService extends MicroService {
 			@Override
 			public void run() {
                 if(currentTime == duration+1) {
-                    System.out.println("time service start dying");
                     timerTask.cancel();
                     timer.cancel();
-                    System.out.println("timers has canceled");
                     terminate();
-
                 }
                 else {
                     sendBroadcast(new TickBroadcast(currentTime));

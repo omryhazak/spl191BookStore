@@ -50,6 +50,24 @@ public class BookStoreRunner {
 
     }
 
+
+    //private function that creates all the output files
+    private static void generateOutputFiles(MoneyRegister m, Inventory inv,HashMap<Integer, Customer> customersHashMap, String s1,String s2,String s3,String s4){
+        m.printOrderReceipts(s1);
+        inv.printInventoryToFile(s2);
+        generateOutFile(m, s3);
+        generateOutFile(customersHashMap, s4);
+
+    }
+
+    //private function that generates the output files for the moneyRegister and the customers
+    private static void generateOutFile(Object o, String filePath){
+        try(FileOutputStream file = new FileOutputStream(filePath); ObjectOutputStream output = new ObjectOutputStream(file)){
+            output.writeObject(o);
+        }catch (Exception e){}
+    }
+
+
     //creating the output customers hash map
     private static HashMap<Integer, Customer> initialCustomerHashMap(Parser parser){
         HashMap<Integer, Customer> customersHashMap = new HashMap();
@@ -59,24 +77,5 @@ public class BookStoreRunner {
         return customersHashMap;
     }
 
-
-    //private function that creates all the output file
-    private static void generateOutputFiles(MoneyRegister m, Inventory inv,HashMap<Integer, Customer> customersHashMap, String s1,String s2,String s3,String s4){
-        m.printOrderReceipts(s1);
-        inv.printInventoryToFile(s2);
-        try(FileOutputStream file = new FileOutputStream(s3); ObjectOutputStream output = new ObjectOutputStream(file)){
-            output.writeObject(m);
-        }catch (Exception e){
-            System.out.println("bkldfgrlrnfio");
-        }
-        try(FileOutputStream file = new FileOutputStream(s4); ObjectOutputStream output = new ObjectOutputStream(file)){
-            output.writeObject(customersHashMap);
-        }catch (Exception e){
-            System.out.println("im in customer");
-        }
-
-
-
-    }
 
 }
