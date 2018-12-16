@@ -62,7 +62,7 @@ public class Services {
 
 
         for(int i=1; i <= logistics; i++){
-           Thread t = new Thread(new LogisticsService("logisticsService" + i, (int) time.getDuration(), countDownLatch));
+           Thread t = new Thread(new LogisticsService("logisticsService" + i, (int) time.getDuration(), (int) time.getSpeed(), countDownLatch));
             threadsArray[counter] = t;
             counter++;
             t.start();

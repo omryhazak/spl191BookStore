@@ -99,10 +99,10 @@ public class MessageBusImpl implements MessageBus {
         if (!e.getClass().equals(ResolveAllFutures.class)) {
             Object lock = new Object();
             MicroService m;
-            if (mapOfEvents.get(e.getClass()).size() != 0) {
+            if (!mapOfEvents.isEmpty() && mapOfEvents.get(e.getClass()).size() != 0) {
                 try {
                     synchronized (lock) {
-                        m = mapOfEvents.get(e.getClass()).getFirst();
+                        m = mapOfEvents.get(e.getClass()).pollFirst();
                         mapOfEvents.get(e.getClass()).addLast(m);
                     }
                     mapOfMS.get(m).add(e);
@@ -153,8 +153,20 @@ public class MessageBusImpl implements MessageBus {
         //delete m's event subscription
         //if the event's list is empty than remove it
         for (Object o : mapOfEvents.keySet()) {
-            mapOfEvents.get(o).remove(m);
-            if(mapOfEvents.get(o).isEmpty()) mapOfEvents.remove(o);
+
+            if(mapOfEvents.get(o) != null) {
+                if (mapOfEvents.get(o).contains(m)) {
+                    mapOfEvents.get(o).remove(m);
+                    if (mapOfEvents.get(o).isEmpty()) {
+                        mapOfEvents.remove(o);
+                    }
+                }
+            }
+
+
+
+
+
         }
 
         //delete m's broadcast subscription

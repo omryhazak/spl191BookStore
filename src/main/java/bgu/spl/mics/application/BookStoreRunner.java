@@ -72,9 +72,10 @@ public class BookStoreRunner {
     //creating the output customers hash map
     private static HashMap<Integer, Customer> initialCustomerHashMap(Parser parser){
         HashMap<Integer, Customer> customersHashMap = new HashMap();
-        for (int i=0; i<parser.getServices().getCustomers().length; i++){
-            customersHashMap.put(parser.getServices().getCustomers()[i].getId(),parser.getServices().getCustomers()[i] );
+        for (Customer c: parser.getServices().getCustomers()){
+            customersHashMap.put(c.getId(), c);
         }
+
         return customersHashMap;
     }
 

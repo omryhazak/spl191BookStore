@@ -9,6 +9,7 @@ import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -24,19 +25,24 @@ public class LogisticsService extends MicroService {
 
 	private int duration;
 	private CountDownLatch countDownLatch;
+	private int tick;
+	int speed;
 
 
 
-	public LogisticsService(String name, int duration, CountDownLatch countDownLatch) {
+	public LogisticsService(String name, int duration, int speed, CountDownLatch countDownLatch) {
 		super(name);
 		this.duration = duration;
 		this.countDownLatch = countDownLatch;
+		this.speed = speed;
 	}
 
 	@Override
 	protected void initialize() {
 		//subscribing to the Tick Broadcast
 		subscribeBroadcast(TickBroadcast.class, b -> {
+
+			tick = b.getCurrentTick();
 
 			////lambda implementation of Tick Broadcast callback
 			if(b.getCurrentTick()==duration) terminate();
@@ -49,9 +55,10 @@ public class LogisticsService extends MicroService {
 			Future<Future<DeliveryVehicle>> f1 = sendEvent(new CheckVehicle());
 
 			//after vehicle was resolved, sending the vehicle with deliver
-			DeliveryVehicle deliveryVehicle = f1.get().get();
+			DeliveryVehicle deliveryVehicle = f1.get().get((duration - tick) * speed, TimeUnit.MILLISECONDS);
 
-			if(deliveryVehicle != null) {
+			if(f1 != null && deliveryVehicle != null && e.getCustomer().getDistance() / deliveryVehicle.getSpeed() + tick * speed > duration * speed) {
+
 				deliveryVehicle.deliver(e.getCustomer().getAddress(), e.getCustomer().getDistance());
 
 				//after delivery was done, releasing the vehicle using returnVehicle event.

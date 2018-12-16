@@ -27,7 +27,7 @@ public class ResourceService extends MicroService{
 	private CountDownLatch countDownLatch;
 
 
-	public ResourceService(String name, int duration, CountDownLatch countDownLatch) {
+	public ResourceService(String name, int duration,  CountDownLatch countDownLatch) {
 		super(name);
 		resourcesHolder = ResourcesHolder.getInstance();
 		this.duration = duration;
