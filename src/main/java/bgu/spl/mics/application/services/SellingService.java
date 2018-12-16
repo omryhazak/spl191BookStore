@@ -77,8 +77,13 @@ public class SellingService extends MicroService {
 			//check availability of the book
 			Future<Integer> f1 = sendEvent(new CheckAvailabilityEvent(e.getBookTitle(), e.getCustomer()));
 
+			int bookPrice = e.getCustomer().getAvailableCreditAmount() + 1;
 
-			int bookPrice = f1.get();
+			synchronized (this) {
+				if (f1 != null) {
+					bookPrice = f1.get();
+				}
+			}
 
 
 			boolean customerHasEnoughMoney = (e.getCustomer().getAvailableCreditAmount() - bookPrice >= 0);

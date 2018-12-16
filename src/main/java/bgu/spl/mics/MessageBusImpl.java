@@ -77,16 +77,18 @@ public class MessageBusImpl implements MessageBus {
 
     @Override
     public void sendBroadcast(Broadcast b) {
-        synchronized (lock3) {
+        synchronized (lock2) {
             LinkedList<MicroService> microServiceLinkedList = mapOfBroadcasts.get(b.getClass());
-            MicroService microService;
-            int counter = 0;
-            while (counter < microServiceLinkedList.size()) {
-                microService = microServiceLinkedList.get(counter);
-                mapOfMS.get(microService).add(b);
-                counter++;
+                for (MicroService m : microServiceLinkedList) {
+                    mapOfMS.get(m).add(b);
+                }
             }
-        }
+//            int counter = 0;
+//            while (counter < microServiceLinkedList.size()) {
+//                microService = microServiceLinkedList.get(counter);
+//                mapOfMS.get(microService).add(b);
+//                counter++;
+//            }
     }
 
 
@@ -97,22 +99,23 @@ public class MessageBusImpl implements MessageBus {
         mapOfFutures.put(e, f);
 
         if (!e.getClass().equals(ResolveAllFutures.class)) {
-            Object lock = new Object();
             MicroService m;
-            if (!mapOfEvents.isEmpty() && mapOfEvents.get(e.getClass()).size() != 0) {
-                try {
-                    synchronized (lock) {
-                        m = mapOfEvents.get(e.getClass()).pollFirst();
-                        mapOfEvents.get(e.getClass()).addLast(m);
+            System.out.println(e.getClass());
+            synchronized (lock2) {
+                if (mapOfEvents != null && !mapOfEvents.isEmpty() && mapOfEvents.get(e.getClass()) != null && mapOfEvents.get(e.getClass()).size() > 0) {
+                    m = mapOfEvents.get(e.getClass()).pollFirst();
+                    mapOfEvents.get(e.getClass()).addLast(m);
+                    if (m != null) {
+                        mapOfMS.get(m).add(e);
+                    } else {
+                        f.resolve(null);
+                        mapOfFutures.remove(f);
                     }
-                    mapOfMS.get(m).add(e);
                     return f;
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                } else {
+                    f.resolve(null);
+                    mapOfFutures.remove(f);
                 }
-            } else {
-                f.resolve(null);
-                mapOfFutures.remove(f);
             }
         }
         else{
@@ -141,14 +144,6 @@ public class MessageBusImpl implements MessageBus {
     public void unregister(MicroService m) {
         //TODO when the last ms get out, close the door
         //delelte m's queue and all the messages from it
-//        LinkedList<Message> queue = new LinkedList<>();
-//        mapOfMS.get(m).drainTo(queue);
-//        Iterator<Message> iterator = queue.listIterator();
-//        while(iterator.hasNext()){
-//            mapOfFutures.get(iterator.next()).resolve(null);
-//        }
-
-        mapOfMS.remove(m);
 
         //delete m's event subscription
         //if the event's list is empty than remove it
@@ -167,9 +162,12 @@ public class MessageBusImpl implements MessageBus {
 
         //delete m's broadcast subscription
         //if the broadcast's list is empty than remove it
+        synchronized (lock2) {
         for (Object o : mapOfBroadcasts.keySet()) {
             mapOfBroadcasts.get(o).remove(m);
             if(mapOfBroadcasts.get(o).isEmpty()) mapOfBroadcasts.remove(o);
+        }
+            mapOfMS.remove(m);
         }
 
     }

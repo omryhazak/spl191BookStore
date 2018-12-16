@@ -168,7 +168,7 @@ public abstract class MicroService implements Runnable {
 
             }catch (InterruptedException e) {}
         }
-
+        System.out.println(this.name + " going to die");
         MB.unregister(this);
     }
 }

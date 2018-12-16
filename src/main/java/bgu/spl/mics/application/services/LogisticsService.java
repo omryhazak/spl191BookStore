@@ -42,6 +42,8 @@ public class LogisticsService extends MicroService {
 		//subscribing to the Tick Broadcast
 		subscribeBroadcast(TickBroadcast.class, b -> {
 
+			System.out.println(this.getName() + " got a tick " + b.getCurrentTick());
+
 			tick = b.getCurrentTick();
 
 			////lambda implementation of Tick Broadcast callback
@@ -54,17 +56,28 @@ public class LogisticsService extends MicroService {
 
 			Future<Future<DeliveryVehicle>> f1 = sendEvent(new CheckVehicle());
 
+			System.out.println(this.getName() + " send a vehicle in time " + tick);
+
 			//after vehicle was resolved, sending the vehicle with deliver
-			DeliveryVehicle deliveryVehicle = f1.get().get();
+			DeliveryVehicle deliveryVehicle = null;
+			Future<DeliveryVehicle> f2 = null;
+			if (f1 != null) {
+				f2 = f1.get();
+				if(f2 != null && f2.isDone()) {
+					deliveryVehicle = f2.get((duration - tick) * speed, TimeUnit.MILLISECONDS);
+				}
+			}
+
+			System.out.println(this.getName() + " got a vehicle in time " + tick);
 
 
-			if(f1 != null && deliveryVehicle != null) {
+			if(f1 != null && f2 != null && deliveryVehicle != null) {
 
 				deliveryVehicle.deliver(e.getCustomer().getAddress(), e.getCustomer().getDistance());
 
 				System.out.println(e.getCustomer().getName() + " book was delievered");
 
-				//after delivery was done, releasing the vehicle using returnVehicle event.
+//				//after delivery was done, releasing the vehicle using returnVehicle event.
 				sendEvent(new ReturnVehicle(deliveryVehicle));
 
 			}
