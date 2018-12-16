@@ -57,14 +57,19 @@ public class LogisticsService extends MicroService {
 			//after vehicle was resolved, sending the vehicle with deliver
 			DeliveryVehicle deliveryVehicle = f1.get().get();
 
+
 			if(f1 != null && deliveryVehicle != null) {
 
 				deliveryVehicle.deliver(e.getCustomer().getAddress(), e.getCustomer().getDistance());
 
+				System.out.println(e.getCustomer().getName() + " book was delievered");
+
 				//after delivery was done, releasing the vehicle using returnVehicle event.
 				sendEvent(new ReturnVehicle(deliveryVehicle));
+
 			}
 		});
+
 		this.countDownLatch.countDown();
 	}
 }

@@ -163,10 +163,6 @@ public class MessageBusImpl implements MessageBus {
                 }
             }
 
-
-
-
-
         }
 
         //delete m's broadcast subscription
