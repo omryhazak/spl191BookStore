@@ -55,9 +55,9 @@ public class LogisticsService extends MicroService {
 			Future<Future<DeliveryVehicle>> f1 = sendEvent(new CheckVehicle());
 
 			//after vehicle was resolved, sending the vehicle with deliver
-			DeliveryVehicle deliveryVehicle = f1.get().get((duration - tick) * speed, TimeUnit.MILLISECONDS);
+			DeliveryVehicle deliveryVehicle = f1.get().get();
 
-			if(f1 != null && deliveryVehicle != null && e.getCustomer().getDistance() / deliveryVehicle.getSpeed() + tick * speed > duration * speed) {
+			if(f1 != null && deliveryVehicle != null) {
 
 				deliveryVehicle.deliver(e.getCustomer().getAddress(), e.getCustomer().getDistance());
 

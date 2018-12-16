@@ -142,4 +142,14 @@ public class Inventory implements Serializable {
 
 	}
 
+	public BookInventoryInfo[] inventoryToArray(){
+		int counter = 0;
+		BookInventoryInfo[] b = new BookInventoryInfo[this.inv.size()];
+		for(BookInventoryInfo bo : inv.values()){
+			b[counter] = bo;
+			counter++;
+		}
+		return b;
+	}
+
 }

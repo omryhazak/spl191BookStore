@@ -5,10 +5,7 @@ import bgu.spl.mics.application.passiveObjects.*;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.*;
 
 /** This is the Main class of the application. You should parse the input file, 
@@ -33,6 +30,8 @@ public class BookStoreRunner {
 
         generateOutputFiles(moneyRegister,inventory, initialCustomerHashMap(parser), args[1] , args[2] , args[3], args[4]);
 
+        System.out.println(customers2string(parser.getServices().getCustomers()));
+        System.out.println(books2string(inventory.inventoryToArray()));
 
     }
 
@@ -78,6 +77,72 @@ public class BookStoreRunner {
 
         return customersHashMap;
     }
+
+
+
+
+    public static String customers2string(Customer[] customers) {
+        String str = "";
+        for (Customer customer : customers)
+            str += customer2string(customer) + "\n---------------------------\n";
+        return str;
+    }
+
+    public static String customer2string(Customer customer) {
+        String str = "id    : " + customer.getId() + "\n";
+        str += "name  : " + customer.getName() + "\n";
+        str += "addr  : " + customer.getAddress() + "\n";
+        str += "dist  : " + customer.getDistance() + "\n";
+        str += "card  : " + customer.getCreditCardNumber() + "\n";
+        str += "money : " + customer.getAvailableCreditAmount();
+        return str;
+    }
+
+    public static String books2string(BookInventoryInfo[] books) {
+        String str = "";
+        for (BookInventoryInfo book : books)
+            str += book2string(book) + "\n---------------------------\n";
+        return str;
+    }
+
+    public static String book2string(BookInventoryInfo book) {
+        String str = "";
+        str += "title  : " + book.getBookTitle() + "\n";
+        str += "amount : " + book.getAmountInInventory() + "\n";
+        str += "price  : " + book.getPrice();
+        return str;
+    }
+
+
+    public static String receipts2string(OrderReceipt[] receipts) {
+        String str = "";
+        for (OrderReceipt receipt : receipts)
+            str += receipt2string(receipt) + "\n---------------------------\n";
+        return str;
+    }
+    public static String receipt2string(OrderReceipt receipt) {
+        String str = "";
+        str += "customer   : " + receipt.getCustomerId() + "\n";
+        str += "order tick : " + receipt.getOrderTick() + "\n";
+        str += "id         : " + receipt.getOrderId() + "\n";
+        str += "price      : " + receipt.getPrice() + "\n";
+        str += "seller     : " + receipt.getSeller();
+        return str;
+    }
+
+    public static void Print(String str, String filename) {
+        try {
+            try (PrintStream out = new PrintStream(new FileOutputStream(filename))) {
+                out.print(str);
+            }
+        } catch (IOException e) {
+            System.out.println("Exception: " + e.getClass().getSimpleName());
+        }
+    }
+
+
+
+
 
 
 }
