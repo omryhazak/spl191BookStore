@@ -6,8 +6,6 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Passive data-object representing a customer of the store.
@@ -26,13 +24,13 @@ public class Customer implements Serializable {
 	private int creditCardNumber;
 	private CreditCard creditCard;
 	private LinkedList<OrderReceipt> receiptList;
-	private LinkedList<OrderSchedule> orderScheduleList;
-	private OrderSchedule[] orderSchedule;
+	private LinkedList<Order> orderScheduleList;
+	private Order[] orderSchedule;
 	public Semaphore semaphore;
 
 
 	//constructor
-	public Customer(int id, String name, String address, int distance, CreditCard creditCard,  LinkedList<OrderReceipt> receiptList, int creditCardNumber, int availableAmountInCard, OrderSchedule[] orderSchedule){
+	public Customer(int id, String name, String address, int distance, CreditCard creditCard,  LinkedList<OrderReceipt> receiptList, int creditCardNumber, int availableAmountInCard, Order[] orderSchedule){
 		this.id = id;
 		this.name = name;
 		this.address = address;
@@ -47,7 +45,7 @@ public class Customer implements Serializable {
 
 	}
 
-	public LinkedList<OrderSchedule> getOrderScheduleList() {
+	public LinkedList<Order> getOrderScheduleList() {
 		return orderScheduleList;
 	}
 
@@ -133,10 +131,12 @@ public class Customer implements Serializable {
 		for (int i = 0; i<this.getOrderSchedule().length; i++){
 			this.orderScheduleList.add(this.orderSchedule[i]);
 		}
+		this.creditCard = null;
 	}
 
-	public OrderSchedule[] getOrderSchedule(){
+	public Order[] getOrderSchedule(){
 		return orderSchedule;
 	}
+
 
 }

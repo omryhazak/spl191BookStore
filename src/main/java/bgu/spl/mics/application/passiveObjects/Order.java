@@ -2,7 +2,7 @@ package bgu.spl.mics.application.passiveObjects;
 
 import java.io.Serializable;
 
-public class OrderSchedule implements Serializable {
+public class Order implements Serializable {
 
     private String bookTitle;
     private int tick;

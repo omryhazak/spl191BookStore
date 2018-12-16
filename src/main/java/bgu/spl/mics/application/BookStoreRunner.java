@@ -30,7 +30,6 @@ public class BookStoreRunner {
 
         MoneyRegister moneyRegister = MoneyRegister.getInstance();
         parser.getServices().startProgram();
-        System.out.println(moneyRegister.getTotalEarnings());
 
         generateOutputFiles(moneyRegister,inventory, initialCustomerHashMap(parser), args[1] , args[2] , args[3], args[4]);
 
@@ -54,10 +53,10 @@ public class BookStoreRunner {
 
     //private function that creates all the output files
     private static void generateOutputFiles(MoneyRegister m, Inventory inv,HashMap<Integer, Customer> customersHashMap, String s1,String s2,String s3,String s4){
-        m.printOrderReceipts(s1);
+        m.printOrderReceipts(s3);
         inv.printInventoryToFile(s2);
-        generateOutFile(m, s3);
-        generateOutFile(customersHashMap, s4);
+        generateOutFile(m, s4);
+        generateOutFile(customersHashMap, s1);
 
     }
 
@@ -65,7 +64,8 @@ public class BookStoreRunner {
     private static void generateOutFile(Object o, String filePath){
         try(FileOutputStream file = new FileOutputStream(filePath); ObjectOutputStream output = new ObjectOutputStream(file)){
             output.writeObject(o);
-        }catch (Exception e){}
+        }catch (Exception e){
+        }
     }
 
 

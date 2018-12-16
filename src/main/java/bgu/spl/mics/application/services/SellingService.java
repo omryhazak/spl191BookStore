@@ -59,7 +59,6 @@ public class SellingService extends MicroService {
 
 			//lambda implementation of bookOrderEvent callback
 
-
 			int processTick = this.currentTime.get();
 			OrderReceipt toReturn = null;
 			int orderTick = e.getOrderTick().get();

@@ -7,12 +7,11 @@ import bgu.spl.mics.application.messages.DeliveryEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.Customer;
 import bgu.spl.mics.application.passiveObjects.OrderReceipt;
-import bgu.spl.mics.application.passiveObjects.OrderSchedule;
+import bgu.spl.mics.application.passiveObjects.Order;
 
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * APIService is in charge of the connection between a client and the store.
@@ -40,7 +39,7 @@ public class APIService extends MicroService {
 	@Override
 	protected void initialize() {
 		//sorting the order schedule by time the books should be ordered.
-		Collections.sort(customer.getOrderScheduleList(), Comparator.comparing(OrderSchedule::getTick));
+		Collections.sort(customer.getOrderScheduleList(), Comparator.comparing(Order::getTick));
 
 		//subscribing to the Tick Broadcast
 		//lambda implementation of Tick Broadcast callback
