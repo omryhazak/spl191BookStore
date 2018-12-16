@@ -48,5 +48,6 @@ public class DeliveryVehicle {
 		try {
 			Thread.sleep(timeToSleep);
 		}catch (InterruptedException e) { }
+
 	}
 }

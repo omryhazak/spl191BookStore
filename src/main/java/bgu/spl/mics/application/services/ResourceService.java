@@ -8,6 +8,8 @@ import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,6 +26,7 @@ public class ResourceService extends MicroService{
 
 	private ResourcesHolder resourcesHolder;
 	private int duration;
+	private Queue<Future<DeliveryVehicle>> futureVehicles;
 	private CountDownLatch countDownLatch;
 
 
@@ -32,6 +35,7 @@ public class ResourceService extends MicroService{
 		resourcesHolder = ResourcesHolder.getInstance();
 		this.duration = duration;
 		this.countDownLatch = countDownLatch;
+		futureVehicles = new ConcurrentLinkedQueue<>();
 	}
 
 	@Override
@@ -42,7 +46,12 @@ public class ResourceService extends MicroService{
 
 			////lambda implementation of Tick Broadcast callback
 
-			if(b.getCurrentTick()==duration) terminate();
+			if(b.getCurrentTick()==duration) {
+				for(Future<DeliveryVehicle> f: futureVehicles){
+					f.resolve(null);
+				}
+				terminate();
+			}
 		});
 
 		//subscribing to the CheckVehicle event
@@ -52,6 +61,7 @@ public class ResourceService extends MicroService{
 
 			//tries to take a vehicle, waits if needed, until there is vehicle.
 			Future<DeliveryVehicle> f1 = resourcesHolder.acquireVehicle();
+			futureVehicles.add(f1);
 			complete(e, f1);
 		});
 
